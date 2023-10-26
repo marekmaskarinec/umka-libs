@@ -1,0 +1,13 @@
+{
+    "name": "csv",
+    "version": "v0.1.0",
+    "author": "Marek Maškarinec <marek@mrms.cz>",
+    "license": "Unlicense/MIT",
+    "description": "CSV parser and encoder",
+    "readme": "README.md",
+    "link": "https://git.sr.ht/~mrms/csvum",
+    "dependencies": [],
+    "include": ["csv.um"],
+    "run_posix": "./pak/umka/linux/umka csv.um",
+    "run_windows": ".\\pak\\umka\\windows\\umka.exe csv.um"
+}
