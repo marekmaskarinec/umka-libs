@@ -1,0 +1,247 @@
+
+import (
+	"std.um" // change me for your std.um location
+)
+
+const (
+	tok_null = 0
+	tok_opener
+	tok_closer
+	tok_colon
+	tok_str
+	tok_int
+	tok_real
+	tok_const
+	tok_separator
+	tok_lopener
+	tok_lcloser
+)
+
+type lexer = struct {
+	inp: str
+	len: int
+	pos: int
+	lineno: int
+}
+
+type token = struct {
+	t: int
+	pos: int
+	value: str
+}
+
+fn (l: ^lexer) get(): char {
+	if l.pos >= l.len { return '\0' }
+	l.pos++
+	return l.inp[l.pos-1]
+}
+
+fn (l: ^lexer) lex_str(): str {
+	const STEP = 64
+	out := make([]char, STEP)
+	buflen := STEP
+	start := l.pos
+	for true {
+		c := l.inp[l.pos]
+		l.pos++
+
+		if l.pos > 1 && c == '"' && l.inp[l.pos-2] != '\\' {
+			break
+		}
+
+		if l.pos-start >= buflen {
+			out = append(out, make([]char, STEP * 4))
+			buflen += STEP * 4
+		}
+
+		out[l.pos-start-1] = c
+	}
+	return out
+}
+
+fn is_num(inp: char): bool {
+	return ((inp >= '0' && inp <= '9') || inp == '.')
+}
+
+fn (l: ^lexer) lex_num(): (str, bool) {
+	out := ""
+	is_real := false
+
+	for true {
+		c := l.get()
+		if c == '.' { is_real = true }
+		if !is_num(c) { break }
+		out += c
+	}
+
+	return out, is_real 
+}
+
+fn (l: ^lexer) lex_space(): str {
+	out := ""
+	l.pos--
+	c := l.get()
+	for c != ' ' && c != '}' && c != ']' && c != '\n' && c != ',' && c != '\t' {
+		out += c
+		c = l.get()
+	}
+	l.pos--
+	return out
+}
+
+fn (l: ^lexer) lex_next(): (token, bool) {
+	for l.pos < l.len && (l.inp[l.pos] == ' ' || l.inp[l.pos] == '\n' || l.inp[l.pos] == '\t') {
+		if l.inp[l.pos] == '\n' {
+			l.lineno++
+		}
+		l.pos++
+	}
+
+	switch l.get() {
+	case '{':
+		return token{tok_opener, l.pos, "{"}, true
+	case '}':
+		return token{tok_closer, l.pos, "}"}, true
+	case '[':
+		return token{tok_lopener, l.pos, "["}, true
+	case ']':
+		return token{tok_lcloser, l.pos, "]"}, true
+	case '"': // are ' or ` strings allowed?
+		return token{tok_str, l.pos, l.lex_str()}, true
+	case '\0':
+		return token{}, false
+	case ':':
+		return token{tok_colon, l.pos, str(l.inp[l.pos-1])}, true
+	case ',':
+		return token{tok_separator, l.pos, str(l.inp[l.pos-1])}, true
+	default:
+		if l.inp[l.pos-1] == '-' || is_num(l.inp[l.pos-1]) {
+			first := l.inp[l.pos-1]
+			val, is_real := l.lex_num()
+			t := tok_int
+			if is_real { t = tok_real }
+			l.pos--
+			return token{t, l.pos, first + val}, true
+		}
+
+		val := l.lex_space()
+		return token{tok_const, l.pos, val}, true
+	}
+
+	return token{}, false
+}
+
+fn (l: ^lexer) parser_error(msg: str) {
+	printf("error %d:%d: %s\n", l.lineno, msg)
+}
+
+fn (l: ^lexer) parse_object(): map[str]any
+fn (l: ^lexer) parse_array(): []any
+
+fn (l: ^lexer) parse_val(t: token): any {
+	switch (t.t) {
+	case tok_str:
+		return t.value
+	case tok_int:
+		return std.atoi(t.value)
+	case tok_real:
+		return std.atof(t.value)
+	case tok_opener:
+		return l.parse_object()
+	case tok_lopener:
+		return l.parse_array()
+	case tok_const:
+		if t.value == "true" {
+			return true
+		} else if t.value == "false" {
+			return false
+		} else if t.value == "null" {
+			return null
+		} else {
+			l.parser_error("unknonw constant")
+		}
+	default:
+		l.parser_error("unsupported json feature")
+	}
+
+	return null
+}
+
+fn (l: ^lexer) parse_object(): map[str]any {
+	var key: str
+	var val: any
+	var out: map[str]any
+	
+	// this looks horrible
+	t, stay := l.lex_next()
+	for stay && t.t != tok_closer {
+		if t.t == tok_str {
+			next, stay := l.lex_next()
+			if next.t != tok_colon {
+				l.parser_error("missing colon")
+				break
+			}
+
+			key = t.value
+			next, stay = l.lex_next()
+			val = l.parse_val(next)
+			next, stay = l.lex_next()
+
+			if stay && next.t != tok_separator && next.t != tok_closer {
+				l.parser_error("missing comma.")
+			}
+
+			out[key] = val
+			if next.t == tok_closer {
+				break
+			}
+		}
+		t, stay = l.lex_next()
+	}
+
+	return out
+}
+
+fn (l: ^lexer) parse_array(): []any {
+	out := []any{}
+
+	stay := true
+	t := token{}
+	for stay && t.t != tok_lcloser {
+		t, stay = l.lex_next()
+		if t.t == tok_lcloser {
+			break
+		}
+
+		out = append(out, l.parse_val(t))
+		t, stay = l.lex_next()
+
+		if stay && (t.t != tok_separator && t.t != tok_lcloser) {
+			l.parser_error("array elements are not separated correctly")
+			break
+		}
+	}
+
+	return out
+}
+
+//~~fn parse
+// parses json provided as an input and returns either map[str]any or []any
+fn parse*(inp: str): any {
+//~~
+	l := lexer{inp, len(inp), 0, 1}
+
+	t, end := l.lex_next()
+	var out: any
+
+	switch (t.t) {
+	case tok_opener:
+		out = l.parse_object()
+	case tok_lopener:
+		out = l.parse_array()
+	default:
+		l.parser_error("top level type can only be an object or an array")
+	}
+
+	return out
+}
