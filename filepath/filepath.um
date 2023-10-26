@@ -1,0 +1,144 @@
+
+import (
+	"std.um"
+)
+
+//~~
+const (
+	nil* = 0
+	windows*
+	unix*
+)
+
+var fileseparator*: char // platform specific file separator. linux => /, windows => \
+var os*: int // current os
+//~~
+
+//~~fn init
+// Automatically initializes platform specific stuff
+fn init() {
+//~~
+	os = windows
+	if std.getenv("HOME") != "" {
+		os = unix
+	}
+
+	switch os {
+	case unix:
+		fileseparator = '/'
+	case windows:
+		fileseparator = '\\'
+	}
+}
+
+// checks, if string contains a char
+fn chcont(inp: str, c: char): bool {
+	for i:=0; i < len(inp); i++ {
+		if inp[i] == c {
+			return true
+		}
+	}
+	return false
+}
+
+//~~fn dir
+// returns the directory in inp
+fn dir*(inp: str): str {
+//~~
+	if os == nil {
+		init()
+	}
+
+	if !chcont(inp, fileseparator) {
+		return ""
+	}
+
+	ln := 0
+	for inp[len(inp)-ln-1] != fileseparator {
+		ln++
+	}
+
+	return slice(inp, 0, len(inp)-ln)
+}
+
+//~~fn ext
+// returns the extension of file inp. if there is no extension, or it is a diroctory, output is ""
+fn ext*(inp: str): str {
+//~~
+	if os == nil {
+		init()
+	}
+
+	if !chcont(inp, '.') {
+		return ""
+	}
+
+	ln := 0
+	for inp[len(inp)-ln-1] != '.' {
+		ln++
+	}
+
+	return slice(inp, len(inp)-ln-1, len(inp))
+}
+
+//~~fn fromslash
+// converts / to platform specific separator
+fn fromslash*(inp: str): str {
+//~~
+	if os == nil {
+		init()
+	}
+
+	if !chcont(inp, '/') || fileseparator == '/' {
+		return inp
+	}
+
+	l := len(inp)
+	b := make([]char, l)
+
+	for i:=0; i < l; i++ {
+		b[i] = inp[i]
+		if inp[i] == '/' {
+			b[i] = fileseparator
+		}
+	}
+
+	return str(b)
+}
+
+//~~fn toslash
+// converts platform specific separator to /
+fn toslash*(inp: str) : str {
+	if os == nil {
+		init()
+	}
+
+	if !chcont(inp, fileseparator) || fileseparator == '/' {
+		return inp
+	}
+
+	b := []char(inp)
+	for i:=0; i < len(inp); i++ {
+		if inp[i] == fileseparator {
+			b[i] = '/'
+		}
+	}
+
+	return b
+}
+
+//~~fn split
+// returns the direcory and file of inp. if inp is a folder, it return "" as a file
+fn split*(inp: str): (str, str) {
+//~~
+	if os == nil {
+		init()
+	}
+
+	dr := dir(inp)
+	if len(dr) == len(inp) { return dr, "" }
+	fname := slice(inp, len(dr), len(inp))
+	return dr, fname
+}
+
+fn main() { }
