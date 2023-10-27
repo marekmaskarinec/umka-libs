@@ -1,0 +1,13 @@
+{
+    "name": "strings",
+    "version": "v0.1.0",
+    "author": "Marek Maškarinec <marek@mrms.cz>",
+    "license": "Unlicense/MIT",
+    "description": "String manipulation library",
+    "readme": "README.md",
+    "link": "https://git.sr.ht/~mrms/stringsum",
+    "dependencies": [],
+    "include": ["strings.um"],
+    "run_posix": "./pak/umka/linux/umka strings.um",
+    "run_windows": ".\\pak\\umka\\windows\\umka.exe strings.um"
+}
