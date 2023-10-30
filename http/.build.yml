@@ -1,0 +1,27 @@
+image: debian/bullseye
+packages:
+- python3
+- python3-pip
+sources:
+- https://git.sr.ht/~mrms/httpum
+- https://git.sr.ht/~mrms/pak
+environment:
+  project: http
+secrets:
+- ee5d9625-4c6b-4a60-af32-85ab589823fc
+shell: false
+tasks:
+- setup: |
+    cd pak
+    python3 -m pip install -r requirements.txt
+    ./setup.py install --user
+- build: |
+    cd httpum
+    python3 -m pak update
+    python3 -m pak build
+- deploy: |
+    cd httpum
+    set +x
+    python3 -m pak upload -t `cat ../.secret` pak.tar
+    python3 -m pak upload -t `cat ../.secret` pak.json
+    set -x

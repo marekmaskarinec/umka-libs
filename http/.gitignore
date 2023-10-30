@@ -1,0 +1,5 @@
+pak/
+curl/
+*.umi
+*.dll
+*.def

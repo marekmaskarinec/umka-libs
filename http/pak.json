@@ -1,0 +1,17 @@
+{
+    "name": "http",
+    "version": "v0.1.0",
+    "author": "Marek Maškarinec <marek@mrms.cz>",
+    "license": "Unlicense/MIT",
+    "description": "HTTP client library",
+    "readme": "README.md",
+    "link": "https://git.sr.ht/~mrms/httpum",
+    "dependencies": [
+        "umka"
+    ],
+    "include": [
+        "http.um"
+    ],
+    "run_posix": "make run",
+    "run_windows": "make run"
+}

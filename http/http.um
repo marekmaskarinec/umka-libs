@@ -1,0 +1,99 @@
+
+//~~struct Response
+// Http response struct.
+type Response* = struct {
+    ok: bool         // true if the request was successful
+    err: str         // error message if the request failed
+    status: int      // HTTP status code
+    body: str        // response body
+    contentType: str // response content type
+}
+//~~
+
+//~~struct GetParams
+// Optional parameters for the `get` function.
+type GetParams* = struct {
+    userAgent: str
+    header: str
+}
+//~~
+
+fn umc__get(url: str, params: ^GetParams, out: ^Response)
+
+//~~fn get
+// Make a GET request.
+fn get*(url: str, params: GetParams = {}): Response {
+//~~
+    resp := Response{}
+    umc__get(url, &params, &resp)
+    return resp
+}
+
+//~~fn encodeUrl
+// Encode a URL with query parameters.
+fn encodeUrl*(url: str, args: map[str]any): str {
+//~~
+    url += "?"
+    for k,v in args {
+        s := sprintf("%v", v)
+        if ^str(v) != null {
+            s = str(v)
+        }
+        url += str(k) + "=" + s + "&"
+    }
+    
+    return slice(url, 0, len(url)-1) // remove last &
+}
+
+//~~struct PostParams
+// Optional parameters for the `post` function.
+type PostParams* = struct {
+    userAgent: str
+    header: str
+}
+//~~
+
+fn umc__post(url: str, body: str, params: ^PostParams, out: ^Response)
+    
+//~~fn post
+// Make a POST request.
+fn post*(url: str, body: str, params: PostParams = {}): Response {
+//~~
+    resp := Response{}
+    umc__post(url, body, &params, &resp)
+    return resp
+}
+
+//~~Example
+fn main() {
+    resp := get(
+        encodeUrl("http://httpbin.org/get", {
+            "foo": "bar",
+            "baz": 42
+        }),
+        {
+            userAgent: "my user agent"
+        }
+    )
+
+    printf("Ok: %v\n", resp.ok)
+    printf("Error: %v\n", resp.err)
+    printf("Code: %v\n", resp.status)
+    printf("Content type: %v\n", resp.contentType)
+    printf("Body: %v\n", resp.body)
+    
+    resp = post(
+        "http://httpbin.org/post",
+        "Hello, world!",
+        {
+            userAgent: "my user agent"
+        }
+    ) 
+
+    printf("Ok: %v\n", resp.ok)
+    printf("Error: %v\n", resp.err)
+    printf("Code: %v\n", resp.status)
+    printf("Content type: %v\n", resp.contentType)
+    printf("Body: %v\n", resp.body)
+}
+//~~
