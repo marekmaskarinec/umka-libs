@@ -1,6 +1,7 @@
 
 import (
 	"std.um"
+	"pak/strings/strings.um"
 )
 
 //~~
@@ -31,16 +32,6 @@ fn init() {
 	}
 }
 
-// checks, if string contains a char
-fn chcont(inp: str, c: char): bool {
-	for i:=0; i < len(inp); i++ {
-		if inp[i] == c {
-			return true
-		}
-	}
-	return false
-}
-
 //~~fn dir
 // returns the directory in inp
 fn dir*(inp: str): str {
@@ -49,16 +40,26 @@ fn dir*(inp: str): str {
 		init()
 	}
 
-	if !chcont(inp, fileseparator) {
+	sp := strings.split(inp, str(fileseparator))
+	if len(sp) < 2 {
 		return ""
 	}
+	return strings.join(slice(sp, 0, len(sp)-1), str(fileseparator))
+}
 
-	ln := 0
-	for inp[len(inp)-ln-1] != fileseparator {
-		ln++
+//~~fn file
+// returns the file in inp
+fn file*(inp: str): str {
+//~~
+	if os == nil {
+		init()
 	}
 
-	return slice(inp, 0, len(inp)-ln)
+	sp := strings.split(inp, str(fileseparator))
+	if len(sp) < 2 {
+		return inp
+	}
+	return sp[len(sp)-1]
 }
 
 //~~fn ext
@@ -68,17 +69,9 @@ fn ext*(inp: str): str {
 	if os == nil {
 		init()
 	}
-
-	if !chcont(inp, '.') {
-		return ""
-	}
-
-	ln := 0
-	for inp[len(inp)-ln-1] != '.' {
-		ln++
-	}
-
-	return slice(inp, len(inp)-ln-1, len(inp))
+	
+	sp := strings.split(inp, ".")
+	return sp[len(sp) - 1]
 }
 
 //~~fn fromslash
@@ -89,21 +82,7 @@ fn fromslash*(inp: str): str {
 		init()
 	}
 
-	if !chcont(inp, '/') || fileseparator == '/' {
-		return inp
-	}
-
-	l := len(inp)
-	b := make([]char, l)
-
-	for i:=0; i < l; i++ {
-		b[i] = inp[i]
-		if inp[i] == '/' {
-			b[i] = fileseparator
-		}
-	}
-
-	return str(b)
+	return strings.replace(inp, "/", str(fileseparator))
 }
 
 //~~fn toslash
@@ -113,32 +92,34 @@ fn toslash*(inp: str) : str {
 		init()
 	}
 
-	if !chcont(inp, fileseparator) || fileseparator == '/' {
-		return inp
-	}
-
-	b := []char(inp)
-	for i:=0; i < len(inp); i++ {
-		if inp[i] == fileseparator {
-			b[i] = '/'
-		}
-	}
-
-	return b
+	return strings.replace(inp, str(fileseparator), "/")
 }
 
-//~~fn split
-// returns the direcory and file of inp. if inp is a folder, it return "" as a file
-fn split*(inp: str): (str, str) {
+//~~fn join
+// joins the strings in inp with platform specific separator
+fn join*(inp: ..str): str {
 //~~
 	if os == nil {
 		init()
 	}
 
-	dr := dir(inp)
-	if len(dr) == len(inp) { return dr, "" }
-	fname := slice(inp, len(dr), len(inp))
-	return dr, fname
+	o := ""
+	for i,s in inp {
+		o += s
+		if i < len(inp) - 1 {
+			o += str(fileseparator)
+		}
+	}
+	   
+	return o
 }
 
-fn main() { }
+fn main() {
+	path := join("home", "user", "file.txt")
+	printf("path: %s\n", path)
+	printf("dir: %s\n", dir(path))
+	printf("file: %s\n", file(path))
+	printf("ext: %s\n", ext(path))
+	printf("fromslash: %s\n", fromslash(path))
+	printf("toslash: %s\n", toslash(path))
+}
