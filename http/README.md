@@ -1,7 +1,7 @@
 # HTTP
 
 An HTTP client library for umka. It works both on Linux and Windows using
-`libcurl`. Install using [PAK](https://tophat2d.dev).
+`libcurl`. Install using [PAK](https://pak.tophat2d.dev).
 
 ## License
 
