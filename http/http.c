@@ -155,10 +155,12 @@ umc__post(UmkaStackSlot *p, UmkaStackSlot *r)
 	}
 
 	curl_easy_getinfo(curl, CURLINFO_RESPONSE_CODE, &ret->code);
-	curl_easy_getinfo(curl, CURLINFO_CONTENT_TYPE, &ret->content_type);
+	char *content_type;
+	curl_easy_getinfo(curl, CURLINFO_CONTENT_TYPE, &content_type);
 
 	b.str[b.len] = 0;
 	ret->body = umkaMakeStr(umka, b.str);
+	ret->content_type = umkaMakeStr(umka, content_type);
 
 	ret->ok = true;
 
