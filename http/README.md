@@ -10,9 +10,13 @@ See `LICENSE` in the repo root.
 ## Example
 
 ```
+import (
+    "pak/http/http.um"
+)
+
 fn main() {
-    resp := get(
-        encodeUrl("http://httpbin.org/get", {
+    resp := http.get(
+        http.encodeUrl("http://httpbin.org/get", {
             "foo": "bar",
             "baz": 42
         }),
@@ -27,7 +31,7 @@ fn main() {
     printf("Content type: %v\n", resp.contentType)
     printf("Body: %v\n", resp.body)
     
-    resp = post(
+    resp = http.post(
         "http://httpbin.org/post",
         "Hello, world!",
         {
