@@ -14,7 +14,7 @@ CFLAGS= \
 LDFLAGS=pak/umka/linux/libumka_static.a -lcurl
 
 .PHONY: all
-all: run
+all: build
 
 %_linux.umi: %.c Makefile
 	@echo CC $@
@@ -33,7 +33,10 @@ libcurl-x64.dll:
 	@echo CC $@
 	@$(CROSS_CC) -shared $(CFLAGS) -o $@ $< -L. -lcurl-x64 -Lpak/umka/windows -lumka
 
+.PHONY: build
+build: $(NAME)_windows.umi $(NAME)_linux.umi
+
 .PHONY: run
-run: $(NAME)_windows.umi $(NAME)_linux.umi
+run: build
 	@$(UMKA) $(NAME).um
 

@@ -10,8 +10,13 @@
         "umka"
     ],
     "include": [
-        "http.um"
+        "http.um",
+	"http_linux.umi",
+	"http_windows.umi",
+	"libcurl-x64.dll",
+	"curl/"
     ],
+    "pre_build": "make build",
     "run_posix": "make run",
     "run_windows": "make run"
 }
