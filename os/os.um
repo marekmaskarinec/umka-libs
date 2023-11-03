@@ -1,0 +1,120 @@
+
+import (
+        "pak/filepath/filepath.um"
+)
+
+//~~type Errno
+// An errno is a number that represents an error. It is 0 on success.
+type Errno* = int
+//~~
+
+fn umc__mkdir(path: str): int
+
+//~~fn mkdir
+// Creates a directory at path. Returns 0 on success, or an errno on failure.
+fn mkdir*(path: str): Errno {
+//~~
+        return umc__mkdir(path)
+}
+
+fn umc__remove(path: str): int
+
+//~~fn remove
+// Removes a file at path. Returns 0 on success, or an errno on failure.
+fn remove*(path: str): Errno {
+//~~
+        return umc__remove(path)
+}
+
+fn umc__strerror(errno: int): str
+                              
+//~~fn strerror
+// Returns a string describing the given errno.
+fn strerror*(errno: Errno): str {
+//~~
+        return umc__strerror(errno)
+}
+
+type StrArr* = []str
+
+fn umc__listdir(path: str, arr: ^StrArr): int
+                                          
+//~~fn listdir
+// Returns a list of files in the given directory, second argument is 0 on
+// success or an errno on failure.
+fn listdir*(path: str): ([]str, Errno) {
+//~~
+        var files: []str
+        err := umc__listdir(path, &files)
+        return files, err
+}
+
+fn umc__isfile(path: str): bool
+
+//~~fn isfile
+// Returns true if the given path is a regular file, false otherwise.
+// If the file doesn't exist, returns false.
+fn isfile*(path: str): bool {
+//~~
+        return umc__isfile(path)
+}
+
+fn umc__isdir(path: str): bool
+
+//~~fn isdir
+// Returns true if the given path is a directory, false otherwise.
+// If the directory doesn't exist, returns false.
+fn isdir*(path: str): bool {
+//~~
+        return umc__isdir(path)
+}
+
+//~~fn walk
+// Walks the given directory, calling the given callback for each file. If
+// excludeDirs is true, directories will not be passed to the callback.
+fn walk*(dir: str, cb: fn(file: str), excludeDirs: bool = false): Errno {
+//~~
+        files, errno := listdir(dir)
+        if errno != 0 {
+                return errno
+        }
+
+        for i,f in files {
+                if f == "." || f == ".." {
+                        continue
+                }
+                
+                fullpath := filepath.join(dir, f)
+
+                if isdir(fullpath) {
+                        walk(fullpath, cb, excludeDirs)
+                        if !excludeDirs {
+                                cb(fullpath)
+                        }
+                } else {
+                        cb(fullpath)
+                }
+        }
+        
+        return 0
+}
+
+fn main() {
+        mkdir("test")
+                
+        if errno := remove("test"); errno != 0 {
+                printf("rmfile failed: %v\n", strerror(errno))
+        }
+ 
+        printf("isfile(\"os.um\") = %v\n", isfile("os.um"))
+        printf("isdir(\"os.um\")  = %v\n", isdir("os.um"))
+        printf("isfile(\"pak\")   = %v\n", isfile("pak"))
+        printf("isdir(\"pak\")    = %v\n", isdir("pak"))
+        
+        printf("Walk dir:\n")
+        if errno := walk(".", fn(file: str) {
+                printf("\t%v\n", file)
+        }); errno != 0 {
+                printf("walk failed: %v\n", strerror(errno))
+        }
+}
