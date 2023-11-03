@@ -1,0 +1,27 @@
+image: debian/bullseye
+packages:
+- python3
+- python3-pip
+sources:
+- https://git.sr.ht/~mrms/osum
+- https://git.sr.ht/~mrms/pak
+environment:
+  project: os
+secrets:
+- 071d40c1-1c61-43be-92b6-0b3fe81e70a5
+shell: false
+tasks:
+- setup: |
+    cd pak
+    python3 -m pip install -r requirements.txt
+    ./setup.py install --user
+- build: |
+    cd osum
+    python3 -m pak update
+    python3 -m pak build
+- deploy: |
+    cd osum
+    set +x
+    python3 -m pak upload -t `cat ../.secret` pak.tar
+    python3 -m pak upload -t `cat ../.secret` pak.json
+    set -x
