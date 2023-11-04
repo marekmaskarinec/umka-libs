@@ -8,7 +8,7 @@ sources:
 environment:
   project: filepath
 secrets:
-- 8bafe431-75a5-43a8-a2d5-8a2ce760d1cb
+- 1d3c187b-0f00-4efa-91df-b9523c3a2db5
 shell: false
 tasks:
 - setup: |
