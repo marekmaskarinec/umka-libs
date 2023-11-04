@@ -11,7 +11,7 @@ sources:
 environment:
   project: http
 secrets:
-- ee5d9625-4c6b-4a60-af32-85ab589823fc
+- 591523b2-7d79-4732-961b-46f4a8658d6b
 shell: false
 tasks:
 - setup: |
