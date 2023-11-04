@@ -8,7 +8,7 @@ sources:
 environment:
   project: os
 secrets:
-- 071d40c1-1c61-43be-92b6-0b3fe81e70a5
+- 7f91a5cb-3777-4949-a6b8-4f8f3e924797
 shell: false
 tasks:
 - setup: |
