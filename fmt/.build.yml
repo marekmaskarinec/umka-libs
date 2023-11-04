@@ -8,7 +8,7 @@ sources:
 environment:
   project: fmt
 secrets:
-- c591317d-851e-4258-ab5e-884ca5c962c5
+- ed722dc4-1829-4784-bcc1-381c880a854f
 shell: false
 tasks:
 - setup: |
