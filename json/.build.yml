@@ -8,7 +8,7 @@ sources:
 environment:
   project: jsonum
 secrets:
-- 9fb61155-1fd0-4a38-ac48-fc2557f98065
+- 8e8fa4e3-0545-49c3-87b7-751b60055a3f
 shell: false
 tasks:
 - setup: |
