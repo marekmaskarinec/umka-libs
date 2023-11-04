@@ -20,19 +20,18 @@ all: build
 	@echo CC $@
 	@$(CC) $(CFLAGS) -shared -o $@ $< $(LDFLAGS)
 	
-curl:
+libcurl-x64.dll:
 	@echo Downloading libcurl-x64.dll
-	@curl https://curl.se/windows/dl-8.4.0_6/curl-8.4.0_6-win64-mingw.zip -o curl.zip
-	@unzip curl.zip
-	@mv curl-8.4.0_6-win64-mingw curl
-	@cp -r curl/include/curl/* curl
-	@rm -r curl.zip
+	@curl https://curl.se/windows/dl-8.4.0_6/curl-8.4.0_6-win64-mingw.zip -O
+	@unzip curl-8.4.0_6-win64-mingw.zip
+	@cp curl-8.4.0_6-win64-mingw/bin/libcurl-x64.dll libcurl-x64.dll
+	@cp curl-8.4.0_6-win64-mingw/bin/libcurl-x64.def libcurl-x64.def
+	@cp -r curl-8.4.0_6-win64-mingw/include/curl/ .
+	@rm -r curl-8.4.0_6-win64-mingw curl-8.4.0_6-win64-mingw.zip
 
-%_windows.umi: %.c curl Makefile
+%_windows.umi: %.c libcurl-x64.dll Makefile
 	@echo CC $@
-	@$(CROSS_CC) -shared $(CFLAGS) -o $@ $< -Lpak/umka/windows -lumka \
-		-static -static-libgcc -static-libstdc++ -DCURL_STATICLIB -Lcurl/lib \
-		-pipe -lnghttp2 -lidn2 -lssl -lcrypto -lgdi32 -lcrypt32 -lwldap32 -lbrotlidec-static -lz -lws2_32
+	@$(CROSS_CC) -shared $(CFLAGS) -o $@ $< -L. -lcurl-x64 -Lpak/umka/windows -lumka
 
 .PHONY: build
 build: $(NAME)_windows.umi $(NAME)_linux.umi
