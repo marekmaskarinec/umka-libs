@@ -134,3 +134,12 @@ umc__isdir(UmkaStackSlot *p, UmkaStackSlot *r)
 
 	r->intVal = S_ISDIR(st.st_mode);
 }
+
+// fn umc__chmod(path: str, mode: uint32): int
+void
+umc__chmod(UmkaStackSlot *p, UmkaStackSlot *r)
+{
+	char *path = p[1].ptrVal;
+	int mode = p[0].intVal;
+	r->intVal = chmod(path, mode);
+}

@@ -125,6 +125,16 @@ fn walk*(dir: str, cb: fn(file: str), excludeDirs: bool = false): Errno {
         return 0
 }
 
+fn umc__chmod(path: str, mode: int): int
+
+//~~fn chmod
+// Changes the permissions of the given file. Returns 0 on success, or an
+// errno on failure.
+fn chmod*(path: str, mode: int): Errno {
+//~~
+        return umc__chmod(path, mode)
+}
+
 fn main() {
         mkdir("test")
                 
@@ -145,4 +155,5 @@ fn main() {
         }
         
         mkdirp("test/one/two/three")
+        chmod("test", 0744)
 }
