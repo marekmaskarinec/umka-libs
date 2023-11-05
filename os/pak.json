@@ -1,14 +1,15 @@
 {
     "name": "os",
-    "version": "v0.1.0",
-    "author": "Marek Maškarinec <marek@mrms.cz>",
+    "version": "v0.1.1",
+    "author": "Marek Ma\u0161karinec <marek@mrms.cz>",
     "license": "Unlicense/MIT",
     "description": "OS operation library",
     "readme": "README.md",
     "link": "",
     "dependencies": [
         "umka",
-        "filepath"
+        "filepath",
+        "strings"
     ],
     "include": [
         "os.um"

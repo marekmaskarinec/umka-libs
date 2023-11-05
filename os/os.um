@@ -1,12 +1,33 @@
 
 import (
         "pak/filepath/filepath.um"
+        "pak/strings/strings.um"
 )
 
 //~~type Errno
 // An errno is a number that represents an error. It is 0 on success.
 type Errno* = int
 //~~
+
+fn umc__isfile(path: str): bool
+
+//~~fn isfile
+// Returns true if the given path is a regular file, false otherwise.
+// If the file doesn't exist, returns false.
+fn isfile*(path: str): bool {
+//~~
+        return umc__isfile(path)
+}
+
+fn umc__isdir(path: str): bool
+
+//~~fn isdir
+// Returns true if the given path is a directory, false otherwise.
+// If the directory doesn't exist, returns false.
+fn isdir*(path: str): bool {
+//~~
+        return umc__isdir(path)
+}
 
 fn umc__mkdir(path: str): int
 
@@ -15,6 +36,31 @@ fn umc__mkdir(path: str): int
 fn mkdir*(path: str): Errno {
 //~~
         return umc__mkdir(path)
+}
+
+//~~fn mkdirp
+// If the directory at path doesn't exist, creates it and all parent
+// directories. Returns EALREADY if part of the path already exists and is a
+// file.
+fn mkdirp*(path: str): Errno {
+//~~
+        // hack to initialize the library
+        filepath.dir(".")
+                
+        parts := strings.split(path, str(filepath.fileseparator))
+        accum := ""
+        for i in parts {
+                accum += parts[i] + str(filepath.fileseparator)
+                if isfile(accum) {
+                        return 37 // EALREADY
+                }
+                
+                if !isdir(accum) {
+                        mkdir(accum)
+                }
+        }
+        
+        return 0
 }
 
 fn umc__remove(path: str): int
@@ -47,26 +93,6 @@ fn listdir*(path: str): ([]str, Errno) {
         var files: []str
         err := umc__listdir(path, &files)
         return files, err
-}
-
-fn umc__isfile(path: str): bool
-
-//~~fn isfile
-// Returns true if the given path is a regular file, false otherwise.
-// If the file doesn't exist, returns false.
-fn isfile*(path: str): bool {
-//~~
-        return umc__isfile(path)
-}
-
-fn umc__isdir(path: str): bool
-
-//~~fn isdir
-// Returns true if the given path is a directory, false otherwise.
-// If the directory doesn't exist, returns false.
-fn isdir*(path: str): bool {
-//~~
-        return umc__isdir(path)
 }
 
 //~~fn walk
@@ -117,4 +143,6 @@ fn main() {
         }); errno != 0 {
                 printf("walk failed: %v\n", strerror(errno))
         }
+        
+        mkdirp("test/one/two/three")
 }
