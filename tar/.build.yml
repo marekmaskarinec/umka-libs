@@ -1,0 +1,28 @@
+image: debian/bullseye
+packages:
+- python3
+- python3-pip
+- mingw-w64
+sources:
+- https://git.sr.ht/~mrms/tarum
+- https://git.sr.ht/~mrms/pak
+environment:
+  project: tar
+secrets:
+- 1f9f8058-774e-4765-83d4-548a138a1c05
+shell: false
+tasks:
+- setup: |
+    cd pak
+    python3 -m pip install -r requirements.txt
+    ./setup.py install --user
+- build: |
+    cd tarum
+    python3 -m pak update
+    python3 -m pak build
+- deploy: |
+    cd tarum
+    set +x
+    python3 -m pak upload -t `cat ../.secret` pak.tar
+    python3 -m pak upload -t `cat ../.secret` pak.json
+    set -x

@@ -1,0 +1,4 @@
+*.umi
+pak/
+extracted
+test.tar

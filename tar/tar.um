@@ -1,0 +1,209 @@
+    
+import (
+    "pak/os/os.um"
+    "pak/filepath/filepath.um"
+    "std.um"
+)
+
+//~~struct File
+// Struct representing a file in a tar archive.
+type File* = struct {
+//~~
+    mode: uint32
+    owner: uint32
+    size: uint32
+    mtime: uint32
+    filetype: uint32
+    name: str
+    linkname: str
+}
+
+//~~opaque Tar
+// A tar archive handle
+type Tar* = struct{ _: ^struct{} }
+//~~
+
+//~~enum Errno
+// Error codes returned by tar functions
+type Errno* = int32
+//
+
+fn umc__tar_strerror(err: Errno): str
+                                  
+//~~fn strerror
+// Returns a string describing the given error code.
+fn strerror*(err: Errno): str {
+//~~
+    return umc__tar_strerror(err)
+}
+
+fn umc__tar_open(path: str, mode: str, out: ^Tar): Errno
+                                                        
+//~~fn open
+// Opens a tar archive at the given path with the given mode.
+fn open*(path: str, mode: str): (Tar, Errno) {
+//~~
+    var t: Tar
+    err := umc__tar_open(path, mode, &t)
+    return t, err
+}
+
+fn umc__tar_close(tar: ^struct{}): Errno
+
+//~~fn close
+// Closes the given tar archive.
+fn (t: ^Tar) close*(): Errno {
+//~~
+    return umc__tar_close(t._)
+}
+
+type FileArr* = []File
+
+fn umc__tar_get_files(tar: ^struct{}, out: ^FileArr): Errno
+                                                      
+//~~fn getFiles
+// Returns a list of files in the given tar archive.
+fn (t: ^Tar) getFiles*(): ([]File, Errno) {
+//~~
+    files := []File{}
+    err := umc__tar_get_files(t._, &files)
+    return files, err
+}
+
+fn umc__tar_read_str(tar: ^struct{}, path: str, out: ^str): Errno
+
+//~~fn readStr
+// Reads the given file from the tar archive as a string.
+fn (t: ^Tar) readStr*(path: str): (str, Errno) {
+//~~
+    var s: str
+    err := umc__tar_read_str(t._, path, &s)
+    return s, err
+}
+
+type ByteArr* = []uint8
+fn umc__tar_read_bin(tar: ^struct{}, path: str, out: ^[]uint8): Errno
+
+//~~fn readBin
+// Reads the given file from the tar archive as a byte array.
+fn (t: ^Tar) readBin*(path: str): ([]uint8, Errno) {
+//~~
+    var s: []uint8
+    err := umc__tar_read_bin(t._, path, &s)
+    return s, err
+}
+
+//~~fn extract
+// Extracts the given tar archive to the given directory.
+fn (t: ^Tar) extract*(dir: str): Errno {
+//~~
+    files, err := t.getFiles()
+    if (err != 0) {
+        return err
+    }
+        
+    os.mkdirp(dir)    
+
+    for i:=0; i < len(files); i++ {
+        path := filepath.join(dir, files[i].name)
+        os.mkdirp(filepath.dir(path))
+
+        dat, err := t.readBin(files[i].name)
+        if (err != 0) {
+            return err
+        }
+
+        f := std.fopen(path, "wb")
+        std.fwrite(f, dat)
+        std.fclose(f)
+        
+        os.chmod(path, files[i].mode)
+    }
+    
+    return 0
+}
+
+fn umc__tar_add_file(t: ^struct{}, path: str): Errno
+
+//~~fn addFile
+// Adds the given file to the tar archive. Directories are not added
+// recursively.
+fn (t: ^Tar) addFile*(path: str): Errno {
+//~~
+    return umc__tar_add_file(t._, path)
+}
+
+fn umc__tar_finalize(t: ^struct{}): Errno
+
+//~~fn finalize
+// Finalizes the tar archive.
+fn (t: ^Tar) finalize*(): Errno {
+//~~
+    return umc__tar_finalize(t._)
+}
+
+fn main() {
+    var err: Errno
+    var tar: Tar
+        
+    tar, err = open("test.tar", "w")
+    if err != 0 {
+        printf("Error opening tar file: %s\n", strerror(err))
+        return
+    }
+    
+    tar.addFile("pak.json")
+    tar.addFile("microtar/README.md")
+    tar.addFile("tar_linux.umi")
+    
+    err = tar.finalize()
+    if err != 0 {
+        printf("Error finalizing tar file: %s\n", strerror(err))
+        return
+    }
+    
+    err = tar.close()
+    if err != 0 {
+        printf("Error closing tar file: %s\n", strerror(err))
+        return
+    }
+    
+    tar, err = open("test.tar", "r")
+    if err != 0 {
+        printf("Error opening tar file: %s\n", strerror(err))
+        return
+    }
+    
+    var files: []File
+    files, err = tar.getFiles()
+    if err != 0 {
+        printf("Error reading tar file: %s\n", strerror(err))
+        return
+    }
+    
+    printf("Files in tar file:\n")
+    for i in files {
+        printf("  %s\n", files[i].name)
+    }
+    
+    printf("Reading pak.json:\n")
+    var pakJson: str
+    pakJson, err = tar.readStr("pak.json")
+    if err != 0 {
+        printf("Error reading pak.json: %s\n", strerror(err))
+        return
+    }
+    printf("%s\n", pakJson)
+        
+    err = tar.extract("extracted")
+    if err != 0 {
+        printf("Error extracting tar file: %s\n", strerror(err))
+        return
+    }
+    
+    err = tar.close()
+    if err != 0 {
+        printf("Error closing tar file: %s\n", strerror(err))
+        return
+    }
+}
