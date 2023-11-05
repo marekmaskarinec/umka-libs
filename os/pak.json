@@ -12,7 +12,9 @@
         "strings"
     ],
     "include": [
-        "os.um"
+        "os.um",
+	"os_linux.umi",
+	"os_windows.umi"
     ],
     "run_posix": "./pak/umka/linux/umka os.um",
     "run_windows": "./pak/umka/windows/umka.exe os.um"
