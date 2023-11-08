@@ -22,7 +22,7 @@ struct Response
 	bool ok;
 	char *err;
 	int64_t code;
-	char *body;
+	UmkaDynArray(uint8_t) body;
 	char *content_type;
 };
 
@@ -56,6 +56,8 @@ writefn(char *ptr, size_t size, size_t nmemb, struct wbuf *b)
 
 	return nmemb;
 }
+
+static void *bytesType = NULL;
 
 // fn umc__get(url: str, params: ^GetParams, out: ^Response)
 void
@@ -104,7 +106,13 @@ umc__get(UmkaStackSlot *p, UmkaStackSlot *r)
 	b.str[b.len] = 0;
 
 	ret->ok = true;
-	ret->body = umkaMakeStr(umka, b.str);
+
+	if (bytesType == NULL) {
+		bytesType = umkaGetType(umka, "http.um", "__Bytes");
+	}
+
+	umkaMakeDynArray(umka, &ret->body, bytesType, b.len);
+	memcpy(ret->body.data, b.str, b.len);
 	ret->content_type = umkaMakeStr(umka, content_type);
 
 cleanup:
@@ -159,7 +167,12 @@ umc__post(UmkaStackSlot *p, UmkaStackSlot *r)
 	curl_easy_getinfo(curl, CURLINFO_CONTENT_TYPE, &content_type);
 
 	b.str[b.len] = 0;
-	ret->body = umkaMakeStr(umka, b.str);
+	if (bytesType == NULL) {
+		bytesType = umkaGetType(umka, "http.um", "__Bytes");
+	}
+
+	umkaMakeDynArray(umka, &ret->body, bytesType, b.len);
+	memcpy(ret->body.data, b.str, b.len);
 	ret->content_type = umkaMakeStr(umka, content_type);
 
 	ret->ok = true;

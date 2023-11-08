@@ -1,6 +1,6 @@
 {
     "name": "http",
-    "version": "v0.1.0",
+    "version": "v0.1.1",
     "author": "Marek Maškarinec <marek@mrms.cz>",
     "license": "Unlicense/MIT",
     "description": "HTTP client library",
@@ -11,10 +11,10 @@
     ],
     "include": [
         "http.um",
-	"http_linux.umi",
-	"http_windows.umi",
-	"libcurl-x64.dll",
-	"curl/"
+        "http_linux.umi",
+        "http_windows.umi",
+        "libcurl-x64.dll",
+        "curl/"
     ],
     "pre_build": "make build",
     "run_posix": "make run",

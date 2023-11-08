@@ -29,7 +29,7 @@ fn main() {
     printf("Error: %v\n", resp.err)
     printf("Code: %v\n", resp.status)
     printf("Content type: %v\n", resp.contentType)
-    printf("Body: %v\n", resp.body)
+    printf("Body: %v\n", str([]char(resp.body)))
     
     resp = http.post(
         "http://httpbin.org/post",
@@ -43,7 +43,7 @@ fn main() {
     printf("Error: %v\n", resp.err)
     printf("Code: %v\n", resp.status)
     printf("Content type: %v\n", resp.contentType)
-    printf("Body: %v\n", resp.body)
+    printf("Body: %v\n", str([]char(resp.body)))
 }
 ```
 
@@ -56,7 +56,7 @@ type Response* = struct {
     ok: bool         // true if the request was successful
     err: str         // error message if the request failed
     status: int      // HTTP status code
-    body: str        // response body
+    body: []uint8    // response body
     contentType: str // response content type
 }
 ```
