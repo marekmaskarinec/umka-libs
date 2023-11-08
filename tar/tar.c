@@ -49,6 +49,59 @@ umc__tar_open(UmkaStackSlot *p, UmkaStackSlot *r)
 	}
 }
 
+static int
+btar_close(mtar_t *tar)
+{
+	free(tar->stream);
+	return 0;
+}
+
+static int
+btar_read(mtar_t *tar, void *data, unsigned size)
+{
+	memcpy(data, tar->stream + tar->pos, size);
+	tar->pos += size;
+	return 0;
+}
+
+static int
+btar_seek(mtar_t *tar, unsigned pos)
+{
+	tar->pos = pos;
+	return 0;
+}
+
+static int
+btar_write(mtar_t *tar, const void *data, unsigned size)
+{
+	return MTAR_EFAILURE;
+}
+
+// fn umc__tar_open_bytes(bytes: ^byte, out: ^^struct{}): int
+void
+umc__tar_open_bytes(UmkaStackSlot *p, UmkaStackSlot *r)
+{
+	UmkaDynArray(uint8_t) *bytes_in = p[1].ptrVal;
+	mtar_t **out = (mtar_t **)p[0].ptrVal;
+	void *umka = r->ptrVal;
+
+	*out = umkaAllocData(umka, sizeof(mtar_t), NULL);
+	size_t bytes_len = umkaGetDynArrayLen(bytes_in);
+	uint8_t *bytes = malloc(bytes_len);
+	memcpy(bytes, bytes_in->data, bytes_len);
+
+	**out = (mtar_t){
+	    .stream = bytes,
+	    .remaining_data = bytes_len,
+	    .close = btar_close,
+	    .read = btar_read,
+	    .seek = btar_seek,
+	    .write = btar_write,
+	};
+
+	r->intVal = 0;
+}
+
 void *fileArrType = NULL;
 
 // fn umc__tar_get_files(tar: ^struct{}, out: ^[]File): int

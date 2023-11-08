@@ -1,6 +1,6 @@
 {
     "name": "tar",
-    "version": "v0.1.1",
+    "version": "v0.2.0",
     "author": "Marek Maškarinec <marek@mrms.cz>",
     "license": "Unlicense/MIT",
     "description": "A tar library",

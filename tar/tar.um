@@ -48,6 +48,16 @@ fn open*(path: str, mode: str): (Tar, Errno) {
     return t, err
 }
 
+fn umc__tar_open_bytes(dat: ^[]uint8, out: ^Tar): Errno
+
+//~~fn openBytes
+// Opens a tar archive from the given byte array (read only).
+fn openBytes*(dat: []uint8): (Tar, Errno) {
+    var t: Tar
+    err := umc__tar_open_bytes(&dat, &t)
+    return t, err
+}
+
 fn umc__tar_close(tar: ^struct{}): Errno
 
 //~~fn close
