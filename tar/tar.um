@@ -70,26 +70,15 @@ fn (t: ^Tar) getFiles*(): ([]File, Errno) {
     return files, err
 }
 
-fn umc__tar_read_str(tar: ^struct{}, path: str, out: ^str): Errno
-
-//~~fn readStr
-// Reads the given file from the tar archive as a string.
-fn (t: ^Tar) readStr*(path: str): (str, Errno) {
-//~~
-    var s: str
-    err := umc__tar_read_str(t._, path, &s)
-    return s, err
-}
-
-type ByteArr* = []uint8
-fn umc__tar_read_bin(tar: ^struct{}, path: str, out: ^[]uint8): Errno
+type __Bytes* = []uint8
+fn umc__tar_read(tar: ^struct{}, path: str, out: ^[]uint8): Errno
 
 //~~fn readBin
 // Reads the given file from the tar archive as a byte array.
-fn (t: ^Tar) readBin*(path: str): ([]uint8, Errno) {
+fn (t: ^Tar) read*(path: str): ([]uint8, Errno) {
 //~~
     var s: []uint8
-    err := umc__tar_read_bin(t._, path, &s)
+    err := umc__tar_read(t._, path, &s)
     return s, err
 }
 
@@ -108,7 +97,7 @@ fn (t: ^Tar) extract*(dir: str): Errno {
         path := filepath.join(dir, files[i].name)
         os.mkdirp(filepath.dir(path))
 
-        dat, err := t.readBin(files[i].name)
+        dat, err := t.read(files[i].name)
         if (err != 0) {
             return err
         }
@@ -187,13 +176,14 @@ fn main() {
     }
     
     printf("Reading pak.json:\n")
-    var pakJson: str
-    pakJson, err = tar.readStr("pak.json")
+    var pakJson: []uint8
+    pakJson, err = tar.read("pak.json")
+    printf("%v\n", pakJson)
     if err != 0 {
         printf("Error reading pak.json: %s\n", strerror(err))
         return
     }
-    printf("%s\n", pakJson)
+    printf("%s\n", str([]char(pakJson)))
         
     err = tar.extract("extracted")
     if err != 0 {

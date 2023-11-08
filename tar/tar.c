@@ -95,42 +95,14 @@ umc__tar_get_files(UmkaStackSlot *p, UmkaStackSlot *r)
 	}
 }
 
-// fn umc__tar_read_str(tar: ^struct{}, file: str, out: ^str): int
-void
-umc__tar_read_str(UmkaStackSlot *p, UmkaStackSlot *r)
-{
-	mtar_t *tar = (mtar_t *)p[2].ptrVal;
-	char *file = p[1].ptrVal;
-	char **out = p[0].ptrVal;
-	void *umka = r->ptrVal;
-	r->intVal = 0;
-
-	mtar_header_t h;
-	int ret = mtar_find(tar, file, &h);
-	if (ret) {
-		r->intVal = ret;
-		return;
-	}
-
-	char *buf = malloc(h.size + 1);
-
-	ret = mtar_read_data(tar, buf, h.size);
-	if (ret) {
-		r->intVal = ret;
-		return;
-	}
-
-	buf[h.size] = '\0';
-	*out = umkaMakeStr(umka, buf);
-}
+static void *byteArrType = NULL;
 
 // fn umc__tar_read_bin(tar: ^struct{}, file: str, out: ^[]byte): int
 void
-umc__tar_read_bin(UmkaStackSlot *p, UmkaStackSlot *r)
+umc__tar_read(UmkaStackSlot *p, UmkaStackSlot *r)
 {
-	static void *byteArrType = NULL;
 	if (byteArrType == NULL) {
-		byteArrType = umkaGetType(r->ptrVal, "tar.um", "ByteArr");
+		byteArrType = umkaGetType(r->ptrVal, "tar.um", "__Bytes");
 	}
 
 	mtar_t *tar = (mtar_t *)p[2].ptrVal;
