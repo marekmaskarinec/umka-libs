@@ -57,16 +57,15 @@ writefn(char *ptr, size_t size, size_t nmemb, struct wbuf *b)
 	return nmemb;
 }
 
-static void *bytesType = NULL;
-
-// fn umc__get(url: str, params: ^GetParams, out: ^Response)
+// fn umc__get(url: str, params: ^GetParams, out: ^Response, typeofbytes: ^void)
 void
 umc__get(UmkaStackSlot *p, UmkaStackSlot *r)
 {
 	void *umka = r->ptrVal;
-	char *url = p[2].ptrVal;
-	struct GetParams *params = p[1].ptrVal;
-	struct Response *ret = p[0].ptrVal;
+	char *url = p[3].ptrVal;
+	struct GetParams *params = p[2].ptrVal;
+	struct Response *ret = p[1].ptrVal;
+	void *typeofbytes = p[0].ptrVal;
 	ret->ok = false;
 
 	CURL *curl = curl_easy_init();
@@ -107,11 +106,7 @@ umc__get(UmkaStackSlot *p, UmkaStackSlot *r)
 
 	ret->ok = true;
 
-	if (bytesType == NULL) {
-		bytesType = umkaGetType(umka, "http.um", "__Bytes");
-	}
-
-	umkaMakeDynArray(umka, &ret->body, bytesType, b.len);
+	umkaMakeDynArray(umka, &ret->body, typeofbytes, b.len);
 	memcpy(ret->body.data, b.str, b.len);
 	ret->content_type = umkaMakeStr(umka, content_type);
 
@@ -120,15 +115,16 @@ cleanup:
 	curl_easy_cleanup(curl);
 }
 
-// fn umc__post(url: str, body: str, params: ^GetParams, out: ^Response)
+// fn umc__post(url: str, body: str, params: ^GetParams, out: ^Response, typeofbytes: ^void)
 void
 umc__post(UmkaStackSlot *p, UmkaStackSlot *r)
 {
 	void *umka = r->ptrVal;
-	char *url = p[3].ptrVal;
-	char *body = p[2].ptrVal;
-	struct PostParams *params = p[1].ptrVal;
-	struct Response *ret = p[0].ptrVal;
+	char *url = p[4].ptrVal;
+	char *body = p[3].ptrVal;
+	struct PostParams *params = p[2].ptrVal;
+	struct Response *ret = p[1].ptrVal;
+	void *typeofbytes = p[0].ptrVal;
 	ret->ok = false;
 
 	CURL *curl = curl_easy_init();
@@ -167,11 +163,8 @@ umc__post(UmkaStackSlot *p, UmkaStackSlot *r)
 	curl_easy_getinfo(curl, CURLINFO_CONTENT_TYPE, &content_type);
 
 	b.str[b.len] = 0;
-	if (bytesType == NULL) {
-		bytesType = umkaGetType(umka, "http.um", "__Bytes");
-	}
 
-	umkaMakeDynArray(umka, &ret->body, bytesType, b.len);
+	umkaMakeDynArray(umka, &ret->body, typeofbytes, b.len);
 	memcpy(ret->body.data, b.str, b.len);
 	ret->content_type = umkaMakeStr(umka, content_type);
 

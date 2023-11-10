@@ -1,6 +1,4 @@
 
-type __Bytes* = []uint8
-
 //~~struct Response
 // Http response struct.
 type Response* = struct {
@@ -20,14 +18,14 @@ type GetParams* = struct {
 }
 //~~
 
-fn umc__get(url: str, params: ^GetParams, out: ^Response)
+fn umc__get(url: str, params: ^GetParams, out: ^Response, typeofbytes: ^void)
 
 //~~fn get
 // Make a GET request.
 fn get*(url: str, params: GetParams = {}): Response {
 //~~
     resp := Response{}
-    umc__get(url, &params, &resp)
+    umc__get(url, &params, &resp, typeptr([]uint8))
     return resp
 }
 
@@ -55,14 +53,14 @@ type PostParams* = struct {
 }
 //~~
 
-fn umc__post(url: str, body: str, params: ^PostParams, out: ^Response)
+fn umc__post(url: str, body: str, params: ^PostParams, out: ^Response, typeofbytes: ^void)
     
 //~~fn post
 // Make a POST request.
 fn post*(url: str, body: str, params: PostParams = {}): Response {
 //~~
     resp := Response{}
-    umc__post(url, body, &params, &resp)
+    umc__post(url, body, &params, &resp, typeptr([]uint8))
     return resp
 }
 
