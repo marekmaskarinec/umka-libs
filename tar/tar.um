@@ -109,6 +109,10 @@ fn (t: ^Tar) extract*(dir: str): Errno {
             return err
         }
 
+	if filepath.file(path) == "@PaxHeader" {
+		continue
+	}
+
         f := std.fopen(path, "wb")
         std.fwrite(f, dat)
         std.fclose(f)
