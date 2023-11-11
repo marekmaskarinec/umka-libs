@@ -81,9 +81,17 @@ fn strerror*(errno: Errno): str {
         return umc__strerror(errno)
 }
 
-type StrArr* = []str
+fn umc__link(target: str, link: str): int
 
-fn umc__listdir(path: str, arr: ^StrArr): int
+//~~fn link
+// Creates a symbolic link at link pointing to target. Returns 0 on success, or
+// an errno on failure.
+fn link*(target: str, link: str): Errno {
+//~~
+        return umc__link(target, link)
+}
+
+fn umc__listdir(path: str, arr: ^[]str, strArrType: ^void): int
                                           
 //~~fn listdir
 // Returns a list of files in the given directory, second argument is 0 on
@@ -91,7 +99,7 @@ fn umc__listdir(path: str, arr: ^StrArr): int
 fn listdir*(path: str): ([]str, Errno) {
 //~~
         var files: []str
-        err := umc__listdir(path, &files)
+        err := umc__listdir(path, &files, typeptr([]str))
         return files, err
 }
 

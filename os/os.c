@@ -7,9 +7,11 @@
 #include <umka_api.h>
 
 #ifdef _WIN32
+#include <windows.h>
+
 #include <direct.h>
 #include <fileapi.h>
-#include <windows.h>
+#include <winbase.h>
 #define stat _stat
 #else
 #include <dirent.h>
@@ -46,12 +48,37 @@ umc__strerror(UmkaStackSlot *p, UmkaStackSlot *r)
 	r->ptrVal = umkaMakeStr(r->ptrVal, strerror(errno_));
 }
 
-// fn umc__listdir(path: str, files: ^[]str): int
+// fn umc__link(target: str, linkpath: str): int
+void
+umc__link(UmkaStackSlot *p, UmkaStackSlot *r)
+{
+	char *target = p[1].ptrVal;
+	char *linkpath = p[0].ptrVal;
+	r->intVal = 0;
+
+#ifdef _WIN32
+	struct stat st;
+	if (stat(target, &st)) {
+		r->intVal = errno;
+		return;
+	}
+
+	DWORD flag = 0;
+	if (S_ISDIR(st.st_mode))
+		flag |= 0x1;
+	r->intVal = CreateSymbolicLinkA(linkpath, target, flag) ? 0 : EAGAIN;
+#else
+	r->intVal = symlink(target, linkpath) ? errno : 0;
+#endif
+}
+
+// fn umc__listdir(path: str, files: ^[]str, strArrType: ^void): int
 void
 umc__listdir(UmkaStackSlot *p, UmkaStackSlot *r)
 {
-	char *path = p[1].ptrVal;
-	UmkaDynArray(char *) *files = p[0].ptrVal;
+	char *path = p[2].ptrVal;
+	UmkaDynArray(char *) *files = p[1].ptrVal;
+	void *str_arr_type = p[0].ptrVal;
 	void *umka = r->ptrVal;
 
 #ifdef _WIN32
@@ -73,7 +100,7 @@ umc__listdir(UmkaStackSlot *p, UmkaStackSlot *r)
 		return;
 	}
 
-	umkaMakeDynArray(umka, files, umkaGetType(umka, "os.um", "StrArr"), count);
+	umkaMakeDynArray(umka, files, str_arr_type, count);
 
 	hfind = FindFirstFile(path_, &data);
 	int i = 0;
@@ -96,7 +123,7 @@ umc__listdir(UmkaStackSlot *p, UmkaStackSlot *r)
 	while ((e = readdir(d)) != NULL)
 		++count;
 
-	umkaMakeDynArray(umka, files, umkaGetType(umka, "os.um", "StrArr"), count);
+	umkaMakeDynArray(umka, files, str_arr_type, count);
 
 	seekdir(d, start);
 	for (int i = 0; (e = readdir(d)) != NULL; i++)
