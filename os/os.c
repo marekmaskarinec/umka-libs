@@ -170,3 +170,18 @@ umc__chmod(UmkaStackSlot *p, UmkaStackSlot *r)
 	int mode = p[0].intVal;
 	r->intVal = chmod(path, mode);
 }
+
+// fn umc__get_plat(): Platform
+void
+umc__get_plat(UmkaStackSlot *p, UmkaStackSlot *r)
+{
+#ifdef _POSIX_VERSION
+	r->intVal = 0;
+#elif defined(_WIN32)
+	r->intVal = 1;
+#elif defined(EMSCRIPTEN)
+	r->intVal = 2;
+#else
+	r->intVal = 3;
+#endif
+}

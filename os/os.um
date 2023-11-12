@@ -143,7 +143,29 @@ fn chmod*(path: str, mode: int): Errno {
         return umc__chmod(path, mode)
 }
 
+//~~enum Platform
+// The platform the program is running on.
+type Platform* = int
+const (
+        PlatformPosix* = Platform(0)
+        PlatformWindows*
+        PlatformEmscripten*
+        PlatformUnknown*
+)
+//~~
+
+fn umc__get_plat(): Platform
+
+//~~fn getPlatform
+// Returns the platform the program is running on.
+fn getPlatform*(): Platform {
+//~~
+        return umc__get_plat()
+}
+
 fn main() {
+        printf("Platform: %d\n", getPlatform())
+
         mkdir("test")
                 
         if errno := remove("test"); errno != 0 {
