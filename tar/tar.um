@@ -73,7 +73,7 @@ fn umc__tar_get_files(tar: ^struct{}, out: ^[]File, fileArrType: ^void): Errno
 // Returns a list of files in the given tar archive.
 fn (t: ^Tar) getFiles*(): ([]File, Errno) {
 //~~
-    files := []File{}
+    var files: []File
     err := umc__tar_get_files(t._, &files, typeptr([]File))
     return files, err
 }
@@ -189,7 +189,6 @@ fn main() {
     printf("Reading pak.json:\n")
     var pakJson: []uint8
     pakJson, err = tar.read("pak.json")
-    printf("%v\n", pakJson)
     if err != 0 {
         printf("Error reading pak.json: %s\n", strerror(err))
         return
