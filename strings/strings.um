@@ -49,25 +49,25 @@ fn has_prefix*(s, p: str): bool {
 }
 
 //~~fn split
-// Splits the string by a pattern
-fn split*(s, p: str): []str {
+// Splits the string by the patterns in `ps`
+fn split*(s: str, ps: ..str): []str {
 //~~
 	o := []str{}
 	e := 0
-
-	lp := len(p)
 	ls := len(s)
 
 	for i:=0; i < ls; i++ {
-		if _has_prefix(s, p, i, ls, lp) {
-			o = append(o, slice(s, e, i))
-			i += lp - 1
-			e = i + 1
+		for _, p in ps {
+			lp := len(p)
+			if _has_prefix(s, p, i, ls, lp) {
+				o = append(o, slice(s, e, i))
+				i += lp - 1
+				e = i + 1
+				break
+			}            
 		}
 	}
-
 	o = append(o, slice(s, e))
-
 	return o
 }
 
