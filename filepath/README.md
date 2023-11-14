@@ -19,15 +19,6 @@ var fileseparator*: char // platform specific file separator. linux => /, window
 var os*: int // current os
 ```
 
-## fn init
-
-```
-fn init() {
-```
-
-Automatically initializes platform specific stuff
-
-
 ## fn dir
 
 ```
@@ -35,6 +26,15 @@ fn dir*(inp: str): str {
 ```
 
 returns the directory in inp
+
+
+## fn file
+
+```
+fn file*(inp: str): str {
+```
+
+returns the file in inp
 
 
 ## fn ext
@@ -63,3 +63,20 @@ fn toslash*(inp: str) : str {
 
 converts platform specific separator to /
 
+
+## fn join
+
+```
+fn join*(inp: ..str): str {
+```
+
+joins the strings in inp with platform specific separator
+
+
+## fn split
+
+```
+fn split*(path: str): []str {
+```
+
+Splits inp with platform specific separator or /

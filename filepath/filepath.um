@@ -40,7 +40,7 @@ fn dir*(inp: str): str {
 		init()
 	}
 
-	sp := strings.split(inp, str(fileseparator))
+	sp := strings.split(inp, "/", str(fileseparator))
 	if len(sp) < 2 {
 		return ""
 	}
@@ -55,7 +55,7 @@ fn file*(inp: str): str {
 		init()
 	}
 
-	sp := strings.split(inp, str(fileseparator))
+	sp := strings.split(inp, "/", str(fileseparator))
 	if len(sp) < 2 {
 		return inp
 	}
@@ -88,6 +88,7 @@ fn fromslash*(inp: str): str {
 //~~fn toslash
 // converts platform specific separator to /
 fn toslash*(inp: str) : str {
+//~~
 	if os == nil {
 		init()
 	}
@@ -112,6 +113,17 @@ fn join*(inp: ..str): str {
 	}
 	   
 	return o
+}
+
+//~~fn split
+// Splits inp with platform specific separator or /
+fn split*(path: str): []str {
+//~~
+	if os == nil {
+		init()
+	}
+
+	return strings.split(path, "/", str(fileseparator))
 }
 
 fn main() {
