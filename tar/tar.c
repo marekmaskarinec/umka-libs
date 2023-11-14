@@ -193,8 +193,6 @@ umc__tar_add_file(UmkaStackSlot *p, UmkaStackSlot *r)
 	};
 	strncpy(h.name, file, sizeof(h.name) - 1);
 
-	mtar_write_header(tar, &h);
-
 	if (S_ISDIR(st.st_mode)) {
 		return;
 	}
@@ -204,6 +202,8 @@ umc__tar_add_file(UmkaStackSlot *p, UmkaStackSlot *r)
 		r->intVal = MTAR_EFAILURE;
 		return;
 	}
+
+	mtar_write_header(tar, &h);
 
 	fseek(f, 0, SEEK_END);
 	size_t size = ftell(f);

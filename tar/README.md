@@ -11,7 +11,7 @@ import (
 )
 
 fn main() {
-    var err: Errno
+    var err: tar.Errno
     var t: tar.Tar
         
     t, err = tar.open("test.tar", "w")
@@ -21,8 +21,8 @@ fn main() {
     }
     
     t.addFile("pak.json")
-    t.addFile("microtar/README.md")
-    t.addFile("tar_linux.umi")
+    t.addFile("pak/")
+    t.addFile("README.md")
     
     err = t.finalize()
     if err != 0 {
