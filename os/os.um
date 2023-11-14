@@ -47,7 +47,7 @@ fn mkdirp*(path: str): Errno {
         // hack to initialize the library
         filepath.dir(".")
                 
-        parts := strings.split(path, "/", str(filepath.fileseparator))
+        parts := filepath.split(path)
         accum := ""
         for i in parts {
                 accum += parts[i] + str(filepath.fileseparator)
