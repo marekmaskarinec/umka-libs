@@ -178,7 +178,7 @@ fn umc__setenv(key: str, value: str): int
 //~~fn setEnv
 // Sets the given environment variable to the given value. Returns 0 on
 // success, or an errno on failure.
-fn setEnv(key: str, value: str): Errno {
+fn setEnv*(key: str, value: str): Errno {
 //~~
         return umc__setenv(key, value)
 }
