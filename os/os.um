@@ -1,7 +1,6 @@
 
 import (
         "pak/filepath/filepath.um"
-        "pak/strings/strings.um"
 )
 
 //~~type Errno
@@ -163,8 +162,24 @@ fn getPlatform*(): Platform {
         return umc__get_plat()
 }
 
+fn umc__getcwd(out: ^str): Errno
+
+//~~fn getCwd
+// Returns the current working directory.
+fn getCwd*(): (str, Errno) {
+//~~
+        var out: str
+        errno := umc__getcwd(&out)
+        return out, errno
+}
+
 fn main() {
         printf("Platform: %d\n", getPlatform())
+        if cwd, errno := getCwd(); errno != 0 {
+                printf("getCwd failed: %s\n", strerror(errno))
+        } else {
+                printf("Cwd: %s\n", cwd)
+        }
 
         mkdir("test")
                 

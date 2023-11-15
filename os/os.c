@@ -185,3 +185,28 @@ umc__get_plat(UmkaStackSlot *p, UmkaStackSlot *r)
 	r->intVal = 3;
 #endif
 }
+
+// fn umc__getcwd(out: ^str): Error
+void
+umc__getcwd(UmkaStackSlot *p, UmkaStackSlot *r)
+{
+	char **out = p[0].ptrVal;
+	void *umka = r->ptrVal;
+	r->intVal = 0;
+
+	char buf[1024];
+
+#ifdef _WIN32
+	if (_getcwd(buf, sizeof(buf)) == NULL) {
+		r->intVal = errno;
+		return;
+	}
+#else
+	if (getcwd(buf, sizeof(buf)) == NULL) {
+		r->intVal = errno;
+		return;
+	}
+#endif
+
+	*out = umkaMakeStr(umka, buf);
+}
