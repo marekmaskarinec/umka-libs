@@ -1,6 +1,7 @@
 
 #include <errno.h>
 #include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
 #include <sys/stat.h>
 #include <sys/types.h>
@@ -209,4 +210,21 @@ umc__getcwd(UmkaStackSlot *p, UmkaStackSlot *r)
 #endif
 
 	*out = umkaMakeStr(umka, buf);
+}
+
+// fn umc__setenv(name: str, value: str): int
+void
+umc__setenv(UmkaStackSlot *p, UmkaStackSlot *r)
+{
+	char *name = p[1].ptrVal;
+	char *value = p[0].ptrVal;
+
+#ifdef _WIN32
+	if (SetEnvironmentVariable(name, value) == 0) {
+		r->intVal = EPERM;
+		return;
+	}
+#else
+	r->intVal = setenv(name, value, 1);
+#endif
 }
