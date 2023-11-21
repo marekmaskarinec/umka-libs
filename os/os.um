@@ -112,10 +112,17 @@ fn listdir*(path: str): ([]str, Errno) {
         return files, err
 }
 
+//~~struct WalkArgs
+// Arguments to the walk function.
+type WalkArgs* = struct {
+        excludeDirs: bool // if true, directories will not be walked
+        skipLinks: bool   // if true, symbolic links will not be walked
+}
+//~~
+
 //~~fn walk
-// Walks the given directory, calling the given callback for each file. If
-// excludeDirs is true, directories will not be passed to the callback.
-fn walk*(dir: str, cb: fn(file: str), excludeDirs: bool = false): Errno {
+// Walks the given directory, calling the given callback for each file.
+fn walk*(dir: str, cb: fn(file: str), args: WalkArgs = {}): Errno {
 //~~
         files, errno := listdir(dir)
         if errno != 0 {
@@ -128,10 +135,14 @@ fn walk*(dir: str, cb: fn(file: str), excludeDirs: bool = false): Errno {
                 }
                 
                 fullpath := filepath.join(dir, f)
+                                  
+                if args.skipLinks && islink(fullpath) {
+                        continue
+                }
 
                 if isdir(fullpath) {
-                        walk(fullpath, cb, excludeDirs)
-                        if !excludeDirs {
+                        walk(fullpath, cb, args)
+                        if !args.excludeDirs {
                                 cb(fullpath)
                         }
                 } else {
@@ -217,7 +228,7 @@ fn main() {
         printf("Walk dir:\n")
         if errno := walk(".", fn(file: str) {
                 printf("\t%v\n", file)
-        }); errno != 0 {
+        }, { skipLinks: true }); errno != 0 {
                 printf("walk failed: %v\n", strerror(errno))
         }
         

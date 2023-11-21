@@ -1,6 +1,6 @@
 {
     "name": "os",
-    "version": "v0.1.5",
+    "version": "v0.2.0",
     "author": "Marek Maskarinec <marek@mrms.cz>",
     "license": "Unlicense/MIT",
     "description": "OS operation library",

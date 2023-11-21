@@ -37,8 +37,6 @@ fn main() {
 
 Unlicense/MIT
 
-# Documentation
-
 ## type Errno
 
 ```
@@ -126,14 +124,24 @@ fn listdir*(path: str): ([]str, Errno) {
 Returns a list of files in the given directory, second argument is 0 on
 success or an errno on failure.
 
+## struct WalkArgs
+
+```
+type WalkArgs* = struct {
+        excludeDirs: bool // if true, directories will not be walked
+        skipLinks: bool   // if true, symbolic links will not be walked
+}
+```
+
+Arguments to the walk function.
+
 ## fn walk
 
 ```
-fn walk*(dir: str, cb: fn(file: str), excludeDirs: bool = false): Errno {
+fn walk*(dir: str, cb: fn(file: str), args: WalkArgs = {}): Errno {
 ```
 
-Walks the given directory, calling the given callback for each file. If
-excludeDirs is true, directories will not be passed to the callback.
+Walks the given directory, calling the given callback for each file.
 
 ## fn chmod
 
