@@ -28,6 +28,16 @@ fn isdir*(path: str): bool {
         return umc__isdir(path)
 }
 
+fn umc__islink(path: str): bool
+
+//~~fn islink
+// Returns true if the given path is a symbolic link, false otherwise.
+// If the link doesn't exist, returns false.
+fn islink*(path: str): bool {
+//~~
+        return umc__islink(path)
+}
+
 fn umc__mkdir(path: str): int
 
 //~~fn mkdir
@@ -201,6 +211,8 @@ fn main() {
         printf("isdir(\"os.um\")  = %v\n", isdir("os.um"))
         printf("isfile(\"pak\")   = %v\n", isfile("pak"))
         printf("isdir(\"pak\")    = %v\n", isdir("pak"))
+        printf("islink(\"pak\")   = %v\n", islink("pak"))
+        printf("islink(\"pak/filepath/pak/strings\") = %v\n", islink("pak/filepath/pak/strings"))
         
         printf("Walk dir:\n")
         if errno := walk(".", fn(file: str) {

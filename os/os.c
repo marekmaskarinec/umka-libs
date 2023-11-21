@@ -163,6 +163,29 @@ umc__isdir(UmkaStackSlot *p, UmkaStackSlot *r)
 	r->intVal = S_ISDIR(st.st_mode);
 }
 
+// fn umc__islink(path: str): bool
+void
+umc__islink(UmkaStackSlot *p, UmkaStackSlot *r)
+{
+	char *path = p[0].ptrVal;
+	r->intVal = 0;
+
+#ifdef _WIN32
+	DWORD atts = GetFileAttributes(path);
+
+	if (atts == INVALID_FILE_ATTRIBUTES)
+		return;
+
+	r->intVal = !!(atts & FILE_ATTRIBUTE_REPARSE_POINT);
+#else
+	struct stat st;
+	if (lstat(path, &st))
+		return;
+
+	r->intVal = S_ISLNK(st.st_mode);
+#endif
+}
+
 // fn umc__chmod(path: str, mode: uint32): int
 void
 umc__chmod(UmkaStackSlot *p, UmkaStackSlot *r)
