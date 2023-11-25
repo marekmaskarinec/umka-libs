@@ -5,6 +5,10 @@
 
 #include <umka_api.h>
 
+#ifdef _WIN32
+#include "curl-ca-bundle.crt.h"
+#endif
+
 struct GetParams
 {
 	char *user_agent;
@@ -84,6 +88,14 @@ umc__get(UmkaStackSlot *p, UmkaStackSlot *r)
 	curl_easy_setopt(curl, CURLOPT_FOLLOWLOCATION, 1L);
 	curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, writefn);
 	curl_easy_setopt(curl, CURLOPT_WRITEDATA, &b);
+
+#ifdef _WIN32
+	struct curl_blob blob = {0};
+	blob.data = (uint8_t *)ca_bundle;
+	blob.len = sizeof(ca_bundle);
+	curl_easy_setopt(curl, CURLOPT_CAINFO_BLOB, &blob);
+#endif
+
 	if (umkaGetStrLen(params->header) > 0) {
 		curl_easy_setopt(curl, CURLOPT_HTTPHEADER, params->header);
 	}
@@ -143,6 +155,13 @@ umc__post(UmkaStackSlot *p, UmkaStackSlot *r)
 	curl_easy_setopt(curl, CURLOPT_POSTFIELDS, body);
 	curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, writefn);
 	curl_easy_setopt(curl, CURLOPT_WRITEDATA, &b);
+
+#ifdef _WIN32
+	struct curl_blob blob = {0};
+	blob.data = (uint8_t *)ca_bundle;
+	blob.len = sizeof(ca_bundle);
+	curl_easy_setopt(curl, CURLOPT_CAINFO_BLOB, &blob);
+#endif
 
 	if (umkaGetStrLen(params->header) > 0) {
 		curl_easy_setopt(curl, CURLOPT_HTTPHEADER, params->header);

@@ -26,10 +26,15 @@ libcurl-x64.dll:
 	@unzip curl-8.4.0_6-win64-mingw.zip
 	@cp curl-8.4.0_6-win64-mingw/bin/libcurl-x64.dll libcurl-x64.dll
 	@cp curl-8.4.0_6-win64-mingw/bin/libcurl-x64.def libcurl-x64.def
+	@cp curl-8.4.0_6-win64-mingw/bin/curl-ca-bundle.crt curl-ca-bundle.crt
 	@cp -r curl-8.4.0_6-win64-mingw/include/curl/ .
 	@rm -r curl-8.4.0_6-win64-mingw curl-8.4.0_6-win64-mingw.zip
+	
+curl-ca-bundle.crt.h: curl-ca-bundle.crt
+	@echo EM curl-ca-bundle.crt.h
+	@./pak/umka/linux/umka curl-ca-bundle.crt ca_bundle
 
-%_windows.umi: %.c libcurl-x64.dll Makefile
+%_windows.umi: %.c libcurl-x64.dll curl-ca-bundle.crt.h Makefile
 	@echo CC $@
 	@$(CROSS_CC) -shared $(CFLAGS) -o $@ $< -L. -lcurl-x64 -Lpak/umka/windows -lumka
 

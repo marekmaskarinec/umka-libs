@@ -3,3 +3,4 @@ curl/
 *.umi
 *.dll
 *.def
+curl-ca-bundle.crt.h

@@ -1,7 +1,7 @@
 {
     "name": "http",
     "version": "v0.1.1",
-    "author": "Marek Maškarinec <marek@mrms.cz>",
+    "author": "Marek Ma\u0161karinec <marek@mrms.cz>",
     "license": "Unlicense/MIT",
     "description": "HTTP client library",
     "readme": "README.md",
