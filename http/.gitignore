@@ -4,3 +4,4 @@ curl/
 *.dll
 *.def
 curl-ca-bundle.crt.h
+curl-ca-bundle.crt

@@ -20,7 +20,7 @@ all: build
 	@echo CC $@
 	@$(CC) $(CFLAGS) -shared -o $@ $< $(LDFLAGS)
 	
-libcurl-x64.dll:
+libcurl-x64.dll, curl-ca-bundle.crt:
 	@echo Downloading libcurl-x64.dll
 	@curl https://curl.se/windows/dl-8.4.0_6/curl-8.4.0_6-win64-mingw.zip -O
 	@unzip curl-8.4.0_6-win64-mingw.zip
@@ -32,7 +32,7 @@ libcurl-x64.dll:
 	
 curl-ca-bundle.crt.h: curl-ca-bundle.crt
 	@echo EM curl-ca-bundle.crt.h
-	@./pak/umka/linux/umka curl-ca-bundle.crt ca_bundle
+	@./pak/umka/linux/umka embed.um curl-ca-bundle.crt ca_bundle
 
 %_windows.umi: %.c libcurl-x64.dll curl-ca-bundle.crt.h Makefile
 	@echo CC $@
