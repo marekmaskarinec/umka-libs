@@ -1,13 +1,11 @@
 image: debian/bullseye
 packages:
-- python3
-- python3-pip
+- curl
 - libcurl4-openssl-dev
 - mingw-w64
 - unzip
 sources:
 - https://git.sr.ht/~mrms/httpum
-- https://git.sr.ht/~mrms/pak
 environment:
   project: http
 secrets:
@@ -15,16 +13,16 @@ secrets:
 shell: false
 tasks:
 - setup: |
-    cd pak
-    python3 -m pip install -r requirements.txt
-    ./setup.py install --user
+    curl https://pak.tophat2d.dev/static/pak_portable.zip -O
+    unzip pak_portable.zip
 - build: |
     cd httpum
-    python3 -m pak update
-    python3 -m pak build
+    ../pak_portable/pak update
+    ../pak_portable/pak build
 - deploy: |
     cd httpum
     set +x
-    python3 -m pak upload -t `cat ../.secret` pak.tar
-    python3 -m pak upload -t `cat ../.secret` pak.json
+    ../pak_portable/pak upload -t `cat ../.secret` pak.tar
+    ../pak_portable/pak upload -t `cat ../.secret` pak.json
     set -x
+

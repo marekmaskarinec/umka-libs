@@ -20,7 +20,7 @@ all: build
 	@echo CC $@
 	@$(CC) $(CFLAGS) -shared -o $@ $< $(LDFLAGS)
 	
-libcurl-x64.dll, curl-ca-bundle.crt:
+libcurl-x64.dll curl-ca-bundle.crt:
 	@echo Downloading libcurl-x64.dll
 	@curl https://curl.se/windows/dl-8.4.0_6/curl-8.4.0_6-win64-mingw.zip -O
 	@unzip curl-8.4.0_6-win64-mingw.zip
