@@ -30,14 +30,14 @@ fn main() {
     printf("Code: %v\n", resp.status)
     printf("Content type: %v\n", resp.contentType)
     printf("Body: %v\n", str([]char(resp.body)))
-    
+
     resp = http.post(
         "http://httpbin.org/post",
         "Hello, world!",
         {
             userAgent: "my user agent"
         }
-    ) 
+    )
 
     printf("Ok: %v\n", resp.ok)
     printf("Error: %v\n", resp.err)
@@ -47,24 +47,22 @@ fn main() {
 }
 ```
 
-## Documentation
+# Documentation
 
-### struct Response
+## struct Response
 
 ```
 type Response* = struct {
     ok: bool         // true if the request was successful
     err: str         // error message if the request failed
     status: int      // HTTP status code
-    body: []uint8    // response body
     contentType: str // response content type
 }
 ```
 
 Http response struct.
 
-
-### struct GetParams
+## struct GetParams
 
 ```
 type GetParams* = struct {
@@ -75,17 +73,15 @@ type GetParams* = struct {
 
 Optional parameters for the `get` function.
 
-
-### fn get
+## fn get
 
 ```
-fn get*(url: str, params: GetParams = {}): Response {
+fn get*(url: str, out: io.Writer, params: GetParams = {}): Response {
 ```
 
 Make a GET request.
 
-
-### fn encodeUrl
+## fn encodeUrl
 
 ```
 fn encodeUrl*(url: str, args: map[str]any): str {
@@ -93,8 +89,7 @@ fn encodeUrl*(url: str, args: map[str]any): str {
 
 Encode a URL with query parameters.
 
-
-### struct PostParams
+## struct PostParams
 
 ```
 type PostParams* = struct {
@@ -105,11 +100,55 @@ type PostParams* = struct {
 
 Optional parameters for the `post` function.
 
-
-### fn post
+## fn post
 
 ```
-fn post*(url: str, body: str, params: PostParams = {}): Response {
+fn post*(url: str, inp: io.Reader, out: io.Writer, params: PostParams = {}): Response {
 ```
 
 Make a POST request.
+
+## Example
+
+```
+fn main() {
+    dat := io.mkMemory({})
+    resp := get(
+        encodeUrl("https://httpbin.org/get", {
+            "foo": "bar",
+            "baz": 42
+        }),
+        dat,
+        {
+            userAgent: "my user agent"
+        }
+    )
+
+    printf("Ok: %v\n", resp.ok)
+    printf("Error: %v\n", resp.err)
+    printf("Code: %v\n", resp.status)
+    printf("Content type: %v\n", resp.contentType)
+    printf("Body: %v\n", str([]char(dat.read())))
+
+    f := std.fopen("out", "w")
+    dat = io.mkFile(f)
+    get("https://httpbin.org/get", dat)
+    std.fclose(f)
+
+    dat = io.mkMemory({})
+    resp = post(
+        "https://httpbin.org/post",
+        io.mkMemory([]uint8([]char("Hello world!"))),
+        dat,
+        {
+            userAgent: "my user agent"
+        }
+    )
+
+    printf("Ok: %v\n", resp.ok)
+    printf("Error: %v\n", resp.err)
+    printf("Code: %v\n", resp.status)
+    printf("Content type: %v\n", resp.contentType)
+    printf("Body: %v\n", str([]char(dat.read())))
+}
+```
