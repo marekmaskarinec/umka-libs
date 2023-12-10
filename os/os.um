@@ -1,6 +1,6 @@
 
 import (
-        "pak/filepath/filepath.um"
+        "umbox/filepath/filepath.um"
 )
 
 //~~type Errno
@@ -220,10 +220,10 @@ fn main() {
  
         printf("isfile(\"os.um\") = %v\n", isfile("os.um"))
         printf("isdir(\"os.um\")  = %v\n", isdir("os.um"))
-        printf("isfile(\"pak\")   = %v\n", isfile("pak"))
-        printf("isdir(\"pak\")    = %v\n", isdir("pak"))
-        printf("islink(\"pak\")   = %v\n", islink("pak"))
-        printf("islink(\"pak/filepath/pak/strings\") = %v\n", islink("pak/filepath/pak/strings"))
+        printf("isfile(\"umbox\")   = %v\n", isfile("umbox"))
+        printf("isdir(\"umbox\")    = %v\n", isdir("umbox"))
+        printf("islink(\"umbox\")   = %v\n", islink("umbox"))
+        printf("islink(\"umbox/filepath/umbox/strings\") = %v\n", islink("umbox/filepath/umbox/strings"))
         
         printf("Walk dir:\n")
         if errno := walk(".", fn(file: str) {
