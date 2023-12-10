@@ -1,28 +1,26 @@
 image: debian/bullseye
 packages:
-  - python3
-  - python3-pip
-  - mingw-w64
-sources:
-  - https://git.sr.ht/~mrms/httpum
-  - https://git.sr.ht/~mrms/pak#ae91385ac529031a1340e443ca9014d9de08cebd
-environment:
-  project: http
+- curl
+- mingw-w64
+- unzip
+- libcurl4-openssl-dev
 secrets:
-  - 591523b2-7d79-4732-961b-46f4a8658d6b
-shell: false
+- 591523b2-7d79-4732-961b-46f4a8658d6b
+sources:
+- https://git.sr.ht/~mrms/httpum
+environment:
+    NAME: httpum
 tasks:
-  - setup: |
-      cd pak
-      python3 -m pip install -r requirements.txt
-      ./setup.py install --user
-  - build: |
-      cd httpum
-      python3 -m pak update
-      python3 -m pak build
-  - deploy: |
-      cd httpum
-      set +x
-      python3 -m pak upload -t `cat ../.secret` pak.tar
-      python3 -m pak upload -t `cat ../.secret` pak.json
-      set -x
+- setup: |
+    curl https://mrms.cz/dl/up/umbox_portable.zip -O
+    unzip umbox_portable.zip
+- build: |
+    cd $NAME
+    ../umbox_portable/umbox update
+    ../umbox_portable/umbox build
+- deploy: |
+    cd $NAME
+    set +x
+    ../umbox_portable/umbox upload `cat ../.secret` box.tar
+    ../umbox_portable/umbox upload `cat ../.secret` box.json
+    set -x
