@@ -1,18 +1,18 @@
 
 CROSS_CC=x86_64-w64-mingw32-gcc
 NAME=tar
-UMKA=./pak/umka/linux/umka
+UMKA=./umbox/umka/linux/umka
 CFLAGS= \
 	-Wall \
 	-Wno-unused-label \
 	-Wno-pointer-to-int-cast \
 	-Wno-unused-result \
-	-Ipak/umka/ \
+	-Iumbox/umka/ \
 	-I. \
 	-Imicrotar/src/ \
 	-fPIC \
 	-g
-LDFLAGS=pak/umka/linux/libumka_static.a
+LDFLAGS=umbox/umka/linux/libumka_static.a
 
 .PHONY: all
 all: build
@@ -23,7 +23,7 @@ all: build
 
 %_windows.umi: %.c Makefile
 	@echo CC $@
-	@$(CROSS_CC) -shared $(CFLAGS) -o $@ $< microtar/src/microtar.c -Lpak/umka/windows -lumka
+	@$(CROSS_CC) -shared $(CFLAGS) -o $@ $< microtar/src/microtar.c -Lumbox/umka/windows -lumka
 
 .PHONY: build
 build: $(NAME)_windows.umi $(NAME)_linux.umi
