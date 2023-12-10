@@ -1,17 +1,17 @@
 
 CROSS_CC=x86_64-w64-mingw32-gcc
 NAME=http
-UMKA=./pak/umka/linux/umka
+UMKA=./umbox/umka/linux/umka
 CFLAGS= \
 	-Wall \
 	-Wno-unused-label \
 	-Wno-pointer-to-int-cast \
 	-Wno-unused-result \
-	-Ipak/umka/ \
+	-Iumbox/umka/ \
 	-I. \
 	-fPIC \
 	-g
-LDFLAGS=pak/umka/linux/libumka_static.a -lcurl
+LDFLAGS=umbox/umka/linux/libumka_static.a -lcurl
 
 .PHONY: all
 all: build
@@ -32,11 +32,11 @@ libcurl-x64.dll curl-ca-bundle.crt:
 	
 curl-ca-bundle.crt.h: curl-ca-bundle.crt
 	@echo EM curl-ca-bundle.crt.h
-	@./pak/umka/linux/umka embed.um curl-ca-bundle.crt ca_bundle
+	@./umbox/umka/linux/umka embed.um curl-ca-bundle.crt ca_bundle
 
 %_windows.umi: %.c libcurl-x64.dll curl-ca-bundle.crt.h Makefile
 	@echo CC $@
-	@$(CROSS_CC) -shared $(CFLAGS) -o $@ $< -L. -lcurl-x64 -Lpak/umka/windows -lumka
+	@$(CROSS_CC) -shared $(CFLAGS) -o $@ $< -L. -lcurl-x64 -Lumbox/umka/windows -lumka
 
 .PHONY: build
 build: $(NAME)_windows.umi $(NAME)_linux.umi
