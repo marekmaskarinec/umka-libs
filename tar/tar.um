@@ -1,7 +1,7 @@
     
 import (
-    "pak/os/os.um"
-    "pak/filepath/filepath.um"
+    "umbox/os/os.um"
+    "umbox/filepath/filepath.um"
     "std.um"
 )
 
@@ -152,7 +152,7 @@ fn main() {
         return
     }
     
-    tar.addFile("pak.json")
+    tar.addFile("umbox.json")
     tar.addFile("microtar/README.md")
     tar.addFile("tar_linux.umi")
     
@@ -186,14 +186,14 @@ fn main() {
         printf("  %s\n", files[i].name)
     }
     
-    printf("Reading pak.json:\n")
-    var pakJson: []uint8
-    pakJson, err = tar.read("pak.json")
+    printf("Reading umbox.json:\n")
+    var umboxJson: []uint8
+    umboxJson, err = tar.read("umbox.json")
     if err != 0 {
-        printf("Error reading pak.json: %s\n", strerror(err))
+        printf("Error reading umbox.json: %s\n", strerror(err))
         return
     }
-    printf("%s\n", str([]char(pakJson)))
+    printf("%s\n", str([]char(umboxJson)))
         
     err = tar.extract("extracted")
     if err != 0 {
