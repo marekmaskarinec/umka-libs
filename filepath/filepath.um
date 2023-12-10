@@ -1,7 +1,7 @@
 
 import (
 	"std.um"
-	"pak/strings/strings.um"
+	"umbox/strings/strings.um"
 )
 
 //~~
