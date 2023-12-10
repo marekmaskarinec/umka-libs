@@ -1,6 +1,6 @@
 
 import (
-    "pak/io/io.um"
+    "umbox/io/io.um"
     "std.um"
 )
 
