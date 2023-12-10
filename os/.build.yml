@@ -4,11 +4,11 @@ packages:
 - mingw-w64
 - unzip
 secrets:
-- 170fc95e-4f91-4186-bb3b-94fa63d67f6f
+- 7f91a5cb-3777-4949-a6b8-4f8f3e924797
 sources:
-- https://git.sr.ht/~mrms/ioum
+- https://git.sr.ht/~mrms/osum
 environment:
-    NAME: ioum
+    NAME: osum
 tasks:
 - setup: |
     curl https://mrms.cz/dl/up/umbox_portable.zip -O
