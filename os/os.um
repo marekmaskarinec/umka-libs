@@ -133,23 +133,19 @@ fn walk*(dir: str, cb: fn(file: str), args: WalkArgs = {}): Errno {
                 if f == "." || f == ".." {
                         continue
                 }
-                
+
                 fullpath := filepath.join(dir, f)
-                                  
-                if args.skipLinks && islink(fullpath) {
-                        continue
-                }
 
                 if isdir(fullpath) {
                         walk(fullpath, cb, args)
-                        if !args.excludeDirs {
+                        if !args.excludeDirs && !(args.skipLinks && islink(fullpath)) {
                                 cb(fullpath)
                         }
                 } else {
                         cb(fullpath)
                 }
         }
-        
+
         return 0
 }
 
