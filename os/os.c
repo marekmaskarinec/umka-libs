@@ -59,12 +59,37 @@ umc__link(UmkaStackSlot *p, UmkaStackSlot *r)
 
 #ifdef _WIN32
 	struct stat st;
-	if (stat(target, &st)) {
-		r->intVal = errno;
-		return;
+	{
+		char sep = '\\';
+		char *link_dir = strrchr(linkpath, '\\');
+		if (link_dir == NULL) {
+			link_dir = strrchr(linkpath, '/');
+			sep = '/';
+		}
+
+		if (link_dir == NULL)
+			link_dir = linkpath;
+
+		size_t link_start_len = link_dir - linkpath;
+		char *target_rel = malloc(link_start_len + 1 + strlen(target) + 1);
+		if (target_rel == NULL) {
+			r->intVal = ENOMEM;
+			return;
+		}
+
+		memcpy(target_rel, linkpath, link_start_len);
+		target_rel[link_start_len] = sep;
+		memcpy(target_rel + link_start_len + 1, target, strlen(target) + 1);
+
+		if (stat(target_rel, &st)) {
+			r->intVal = errno;
+			return;
+		}
+
+		free(target_rel);
 	}
 
-	DWORD flag = 0;
+	DWORD flag = 0x2;
 	if (S_ISDIR(st.st_mode))
 		flag |= 0x1;
 	r->intVal = CreateSymbolicLinkA(linkpath, target, flag) ? 0 : EAGAIN;

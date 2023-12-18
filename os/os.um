@@ -233,5 +233,8 @@ fn main() {
         }
         
         mkdirp("test/one/two/three")
+        if errno := link("../../two", "test/one/two/three/four"); errno != 0 {
+                printf("link failed: %v\n", strerror(errno))
+        }
         chmod("test", 0744)
 }
