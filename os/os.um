@@ -137,10 +137,13 @@ fn walk*(dir: str, cb: fn(file: str), args: WalkArgs = {}): Errno {
                 fullpath := filepath.join(dir, f)
 
                 if isdir(fullpath) {
-                        walk(fullpath, cb, args)
-                        if !args.excludeDirs && !(args.skipLinks && islink(fullpath)) {
-                                cb(fullpath)
-                        }
+			if !(args.skipLinks && islink(fullpath)) {
+				walk(fullpath, cb, args)
+			}
+
+			if args.excludeDirs {
+				cb(fullpath)
+			}
                 } else {
                         cb(fullpath)
                 }
