@@ -141,7 +141,7 @@ fn walk*(dir: str, cb: fn(file: str), args: WalkArgs = {}): Errno {
 				walk(fullpath, cb, args)
 			}
 
-			if args.excludeDirs {
+			if !args.excludeDirs {
 				cb(fullpath)
 			}
                 } else {
