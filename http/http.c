@@ -51,6 +51,7 @@ void
 umc__get(UmkaStackSlot *p, UmkaStackSlot *r)
 {
 	void *umka = r->ptrVal;
+	UmkaAPI *api = umkaGetAPI(umka);
 	char *url = p[3].ptrVal;
 	struct GetParams *params = p[2].ptrVal;
 	struct Response *ret = p[1].ptrVal;
@@ -59,7 +60,7 @@ umc__get(UmkaStackSlot *p, UmkaStackSlot *r)
 
 	CURL *curl = curl_easy_init();
 	if (!curl) {
-		ret->err = umkaMakeStr(umka, "curl_easy_init() failed");
+		ret->err = api->umkaMakeStr(umka, "curl_easy_init() failed");
 		return;
 	}
 
@@ -76,16 +77,16 @@ umc__get(UmkaStackSlot *p, UmkaStackSlot *r)
 	curl_easy_setopt(curl, CURLOPT_CAINFO_BLOB, &blob);
 #endif
 
-	if (umkaGetStrLen(params->header) > 0) {
+	if (api->umkaGetStrLen(params->header) > 0) {
 		curl_easy_setopt(curl, CURLOPT_HTTPHEADER, params->header);
 	}
-	if (umkaGetStrLen(params->user_agent) > 0) {
+	if (api->umkaGetStrLen(params->user_agent) > 0) {
 		curl_easy_setopt(curl, CURLOPT_USERAGENT, params->user_agent);
 	}
 
 	res = curl_easy_perform(curl);
 	if (res != CURLE_OK) {
-		ret->err = umkaMakeStr(umka, curl_easy_strerror(res));
+		ret->err = api->umkaMakeStr(umka, curl_easy_strerror(res));
 		goto cleanup;
 	}
 
@@ -95,7 +96,7 @@ umc__get(UmkaStackSlot *p, UmkaStackSlot *r)
 	curl_easy_getinfo(curl, CURLINFO_CONTENT_TYPE, &content_type);
 
 	ret->ok = true;
-	ret->content_type = umkaMakeStr(umka, content_type);
+	ret->content_type = api->umkaMakeStr(umka, content_type);
 
 cleanup:
 	curl_easy_cleanup(curl);
@@ -112,6 +113,7 @@ void
 umc__post(UmkaStackSlot *p, UmkaStackSlot *r)
 {
 	void *umka = r->ptrVal;
+	UmkaAPI *api = umkaGetAPI(umka);
 	char *url = p[4].ptrVal;
 	struct PostParams *params = p[3].ptrVal;
 	struct Response *ret = p[2].ptrVal;
@@ -121,7 +123,7 @@ umc__post(UmkaStackSlot *p, UmkaStackSlot *r)
 
 	CURL *curl = curl_easy_init();
 	if (!curl) {
-		ret->err = umkaMakeStr(umka, "curl_easy_init() failed");
+		ret->err = api->umkaMakeStr(umka, "curl_easy_init() failed");
 		return;
 	}
 
@@ -140,17 +142,17 @@ umc__post(UmkaStackSlot *p, UmkaStackSlot *r)
 	curl_easy_setopt(curl, CURLOPT_CAINFO_BLOB, &blob);
 #endif
 
-	if (umkaGetStrLen(params->header) > 0) {
+	if (api->umkaGetStrLen(params->header) > 0) {
 		curl_easy_setopt(curl, CURLOPT_HTTPHEADER, params->header);
 	}
 
-	if (umkaGetStrLen(params->user_agent) > 0) {
+	if (api->umkaGetStrLen(params->user_agent) > 0) {
 		curl_easy_setopt(curl, CURLOPT_USERAGENT, params->user_agent);
 	}
 
 	CURLcode res = curl_easy_perform(curl);
 	if (res != CURLE_OK) {
-		ret->err = umkaMakeStr(umka, curl_easy_strerror(res));
+		ret->err = api->umkaMakeStr(umka, curl_easy_strerror(res));
 		goto cleanup;
 	}
 
@@ -158,7 +160,7 @@ umc__post(UmkaStackSlot *p, UmkaStackSlot *r)
 	char *content_type;
 	curl_easy_getinfo(curl, CURLINFO_CONTENT_TYPE, &content_type);
 
-	ret->content_type = umkaMakeStr(umka, content_type);
+	ret->content_type = api->umkaMakeStr(umka, content_type);
 	ret->ok = true;
 
 cleanup:

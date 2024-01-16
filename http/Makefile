@@ -11,7 +11,7 @@ CFLAGS= \
 	-I. \
 	-fPIC \
 	-g
-LDFLAGS=umbox/umka/linux/libumka_static.a -lcurl
+LDFLAGS=-lcurl
 
 .PHONY: all
 all: build
@@ -36,7 +36,7 @@ curl-ca-bundle.crt.h: curl-ca-bundle.crt
 
 %_windows.umi: %.c libcurl-x64.dll curl-ca-bundle.crt.h Makefile
 	@echo CC $@
-	@$(CROSS_CC) -shared $(CFLAGS) -o $@ $< -L. -lcurl-x64 -Lumbox/umka/windows -lumka
+	@$(CROSS_CC) -shared $(CFLAGS) -o $@ $< -L. -lcurl-x64
 
 .PHONY: build
 build: $(NAME)_windows.umi $(NAME)_linux.umi
