@@ -186,11 +186,11 @@ fn main() {
         printf("  %s\n", files[i].name)
     }
     
-    printf("Reading umbox.json:\n")
+    printf("Reading box.json:\n")
     var umboxJson: []uint8
-    umboxJson, err = tar.read("umbox.json")
+    umboxJson, err = tar.read("box.json")
     if err != 0 {
-        printf("Error reading umbox.json: %s\n", strerror(err))
+        printf("Error reading box.json: %s\n", strerror(err))
         return
     }
     printf("%s\n", str([]char(umboxJson)))

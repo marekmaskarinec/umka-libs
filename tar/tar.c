@@ -28,8 +28,9 @@ umc__tar_strerror(UmkaStackSlot *p, UmkaStackSlot *r)
 {
 	int err = p[0].intVal;
 	void *umka = r->ptrVal;
+	UmkaAPI *api = umkaGetAPI(umka);
 
-	r->ptrVal = umkaMakeStr(umka, mtar_strerror(err));
+	r->ptrVal = api->umkaMakeStr(umka, mtar_strerror(err));
 }
 
 // fn umc__tar_open(path: str, mode: str, out: ^^struct{}): int
@@ -40,8 +41,9 @@ umc__tar_open(UmkaStackSlot *p, UmkaStackSlot *r)
 	char *mode = (char *)p[1].ptrVal;
 	mtar_t **out = (mtar_t **)p[0].ptrVal;
 	void *umka = r->ptrVal;
+	UmkaAPI *api = umkaGetAPI(umka);
 
-	*out = umkaAllocData(umka, sizeof(mtar_t), NULL);
+	*out = api->umkaAllocData(umka, sizeof(mtar_t), NULL);
 	r->intVal = mtar_open(*out, path, mode);
 
 	if (r->intVal != MTAR_ESUCCESS) {
@@ -84,9 +86,10 @@ umc__tar_open_bytes(UmkaStackSlot *p, UmkaStackSlot *r)
 	UmkaDynArray(uint8_t) *bytes_in = p[1].ptrVal;
 	mtar_t **out = (mtar_t **)p[0].ptrVal;
 	void *umka = r->ptrVal;
+	UmkaAPI *api = umkaGetAPI(umka);
 
-	*out = umkaAllocData(umka, sizeof(mtar_t), NULL);
-	size_t bytes_len = umkaGetDynArrayLen(bytes_in);
+	*out = api->umkaAllocData(umka, sizeof(mtar_t), NULL);
+	size_t bytes_len = api->umkaGetDynArrayLen(bytes_in);
 	uint8_t *bytes = malloc(bytes_len);
 	memcpy(bytes, bytes_in->data, bytes_len);
 
@@ -110,6 +113,7 @@ umc__tar_get_files(UmkaStackSlot *p, UmkaStackSlot *r)
 	UmkaDynArray(File) *out = p[1].ptrVal;
 	void *fileArrType = p[0].ptrVal;
 	void *umka = r->ptrVal;
+	UmkaAPI *api = umkaGetAPI(umka);
 	r->intVal = 0;
 
 	int ret = mtar_seek(tar, 0);
@@ -125,7 +129,7 @@ umc__tar_get_files(UmkaStackSlot *p, UmkaStackSlot *r)
 		mtar_next(tar);
 	}
 
-	umkaMakeDynArray(umka, out, fileArrType, count);
+	api->umkaMakeDynArray(umka, out, fileArrType, count);
 
 	mtar_seek(tar, 0);
 	for (int i = 0; i < count; ++i) {
@@ -136,8 +140,8 @@ umc__tar_get_files(UmkaStackSlot *p, UmkaStackSlot *r)
 		    .size = h.size,
 		    .mtime = h.mtime,
 		    .type = h.type,
-		    .name = umkaMakeStr(umka, h.name),
-		    .linkname = umkaMakeStr(umka, h.linkname),
+		    .name = api->umkaMakeStr(umka, h.name),
+		    .linkname = api->umkaMakeStr(umka, h.linkname),
 		};
 		mtar_next(tar);
 	}
@@ -152,6 +156,7 @@ umc__tar_read(UmkaStackSlot *p, UmkaStackSlot *r)
 	UmkaDynArray(uint8_t) *out = p[1].ptrVal;
 	void *byteArrType = p[0].ptrVal;
 	void *umka = r->ptrVal;
+	UmkaAPI *api = umkaGetAPI(umka);
 	r->intVal = 0;
 
 	mtar_header_t h;
@@ -161,7 +166,7 @@ umc__tar_read(UmkaStackSlot *p, UmkaStackSlot *r)
 		return;
 	}
 
-	umkaMakeDynArray(umka, out, byteArrType, h.size);
+	api->umkaMakeDynArray(umka, out, byteArrType, h.size);
 
 	ret = mtar_read_data(tar, out->data, h.size);
 	if (ret) {

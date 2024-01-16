@@ -11,8 +11,8 @@ CFLAGS= \
 	-I. \
 	-Imicrotar/src/ \
 	-fPIC \
-	-g
-LDFLAGS=umbox/umka/linux/libumka_static.a
+	-O3
+LDFLAGS=
 
 .PHONY: all
 all: build
@@ -23,7 +23,7 @@ all: build
 
 %_windows.umi: %.c Makefile
 	@echo CC $@
-	@$(CROSS_CC) -shared $(CFLAGS) -o $@ $< microtar/src/microtar.c -Lumbox/umka/windows -lumka
+	@$(CROSS_CC) -shared $(CFLAGS) -o $@ $< microtar/src/microtar.c
 
 .PHONY: build
 build: $(NAME)_windows.umi $(NAME)_linux.umi
