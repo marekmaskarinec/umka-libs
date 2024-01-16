@@ -10,8 +10,8 @@ CFLAGS= \
 	-Iumbox/umka/ \
 	-I. \
 	-fPIC \
-	-g
-LDFLAGS=umbox/umka/linux/libumka_static.a
+	-O2
+LDFLAGS=
 
 .PHONY: all
 all: build
@@ -22,7 +22,7 @@ all: build
 
 %_windows.umi: %.c Makefile
 	@echo CC $@
-	@$(CROSS_CC) -shared $(CFLAGS) -o $@ $< -Lumbox/umka/windows -lumka
+	@$(CROSS_CC) -shared $(CFLAGS) -o $@ $<
 
 .PHONY: build
 build: $(NAME)_windows.umi $(NAME)_linux.umi

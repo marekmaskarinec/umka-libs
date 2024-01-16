@@ -16,6 +16,6 @@
         "os_windows.umi"
     ],
     "pre_build": "make build",
-    "run_posix": "./pak/umka/linux/umka os.um",
-    "run_windows": "./pak/umka/windows/umka.exe os.um"
+    "run_posix": "./umbox/umka/linux/umka os.um",
+    "run_windows": "./umbox/umka/windows/umka.exe os.um"
 }
