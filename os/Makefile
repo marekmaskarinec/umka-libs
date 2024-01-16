@@ -7,7 +7,7 @@ CFLAGS= \
 	-Wno-unused-label \
 	-Wno-pointer-to-int-cast \
 	-Wno-unused-result \
-	-Iumbox/umka/ \
+	-Iumbox/umka_api/ \
 	-I. \
 	-fPIC \
 	-O2

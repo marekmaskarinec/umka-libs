@@ -7,7 +7,7 @@
     "readme": "README.md",
     "link": "",
     "dependencies": [
-        "umka",
+        "umka_api",
         "filepath"
     ],
     "include": [
@@ -16,6 +16,5 @@
         "os_windows.umi"
     ],
     "pre_build": "make build",
-    "run_posix": "./umbox/umka/linux/umka os.um",
-    "run_windows": "./umbox/umka/windows/umka.exe os.um"
+		"run": "umka os.um"
 }
