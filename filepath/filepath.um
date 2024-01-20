@@ -106,7 +106,7 @@ fn join*(inp: ..str): str {
 
 	o := ""
 	for i,s in inp {
-		o += s
+		o += strings.trimprefix(s, str(fileseparator))
 		if i < len(inp) - 1 && o[len(o) -1] != fileseparator {
 			o += str(fileseparator)
 		}
@@ -127,7 +127,7 @@ fn split*(path: str): []str {
 }
 
 fn main() {
-	path := join("home/", "user", "file.txt")
+	path := join("home/", "/user", "file.txt")
 	printf("path: %s\n", path)
 	printf("dir: %s\n", dir(path))
 	printf("file: %s\n", file(path))
