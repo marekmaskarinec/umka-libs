@@ -17,11 +17,17 @@ const (
 	tok_lcloser
 )
 
+type Error* = struct {
+	message: str
+	lno: int
+}
+
 type lexer = struct {
 	inp: str
 	len: int
 	pos: int
 	lineno: int
+	errors: []Error
 }
 
 type token = struct {
@@ -132,7 +138,7 @@ fn (l: ^lexer) lex_next(): (token, bool) {
 }
 
 fn (l: ^lexer) parser_error(msg: str) {
-	printf("error %d:%d: %s\n", l.lineno, msg)
+	l.errors = append(l.errors, Error{msg, l.lineno})
 }
 
 fn (l: ^lexer) parse_object(): map[str]any
@@ -158,7 +164,7 @@ fn (l: ^lexer) parse_val(t: token): any {
 		} else if t.value == "null" {
 			return null
 		} else {
-			l.parser_error("unknonw constant")
+			l.parser_error("unknown constant")
 		}
 	default:
 		l.parser_error("unsupported json feature")
@@ -188,7 +194,7 @@ fn (l: ^lexer) parse_object(): map[str]any {
 			next, stay = l.lex_next()
 
 			if stay && next.t != tok_separator && next.t != tok_closer {
-				l.parser_error("missing comma.")
+				l.parser_error("missing comma")
 			}
 
 			out[key] = val
@@ -226,10 +232,11 @@ fn (l: ^lexer) parse_array(): []any {
 }
 
 //~~fn parse
-// parses json provided as an input and returns either map[str]any or []any
+// Parses the JSON from the `inp` string. On success, returns either a
+// `[]any` or `map[str]any`. On error, returns `[]Error`.
 fn parse*(inp: str): any {
 //~~
-	l := lexer{inp, len(inp), 0, 1}
+	l := lexer{inp, len(inp), 0, 1, {}}
 
 	t, end := l.lex_next()
 	var out: any
@@ -243,5 +250,14 @@ fn parse*(inp: str): any {
 		l.parser_error("top level type can only be an object or an array")
 	}
 
+	if len(l.errors) > 0 {
+		return l.errors
+	}
+
 	return out
+}
+
+fn main() {
+	printf("%v\n", parse("{ \"a\": 1.2, \"b\": 34 }"))
+	printf("%v\n", parse("{ \"a\": 1.2 \"b\": 34 }"))
 }

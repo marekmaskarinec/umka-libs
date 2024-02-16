@@ -1,13 +1,13 @@
 {
     "name": "json",
-    "version": "v0.1.0",
+    "version": "v1.0.0",
     "author": "Marek Maškarinec <marek@mrms.cz>",
     "license": "Unlicense/MIT",
     "description": "JSON decoder library",
     "readme": "README.md",
-    "link": "",
+    "link": "https://git.sr.ht/~mrms/jsonum",
     "dependencies": [],
     "include": ["json.um"],
-    "run_posix": "./pak/umka/linux/umka json.um",
-    "run_windows": ".\\pak\\umka\\windows\\umka.exe json.um"
+    "run_posix": "./umbox/umka/linux/umka json.um",
+    "run_windows": ".\\umbox\\umka\\windows\\umka.exe json.um"
 }
