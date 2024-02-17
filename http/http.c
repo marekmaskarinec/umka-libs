@@ -14,13 +14,13 @@
 struct GetParams
 {
 	char *user_agent;
-	char *header;
+	UmkaDynArray(char *) headers;
 };
 
 struct PostParams
 {
 	char *user_agent;
-	char *header;
+	UmkaDynArray(char *) headers;
 };
 
 struct Response
@@ -77,9 +77,16 @@ umc__get(UmkaStackSlot *p, UmkaStackSlot *r)
 	curl_easy_setopt(curl, CURLOPT_CAINFO_BLOB, &blob);
 #endif
 
-	if (api->umkaGetStrLen(params->header) > 0) {
-		curl_easy_setopt(curl, CURLOPT_HTTPHEADER, params->header);
+	int headerCount = api->umkaGetDynArrayLen(&params->headers);
+	struct curl_slist *headers = NULL;
+	if (headerCount > 0) {
+		for (int i = 0; i < headerCount; i++) {
+			headers = curl_slist_append(headers, params->headers.data[i]);
+		}
+
+		curl_easy_setopt(curl, CURLOPT_HTTPHEADER, headers);
 	}
+
 	if (api->umkaGetStrLen(params->user_agent) > 0) {
 		curl_easy_setopt(curl, CURLOPT_USERAGENT, params->user_agent);
 	}
@@ -88,6 +95,10 @@ umc__get(UmkaStackSlot *p, UmkaStackSlot *r)
 	if (res != CURLE_OK) {
 		ret->err = api->umkaMakeStr(umka, curl_easy_strerror(res));
 		goto cleanup;
+	}
+
+	if (headerCount > 0) {
+		curl_slist_free_all(headers);
 	}
 
 	curl_easy_getinfo(curl, CURLINFO_RESPONSE_CODE, &ret->code);
@@ -142,8 +153,14 @@ umc__post(UmkaStackSlot *p, UmkaStackSlot *r)
 	curl_easy_setopt(curl, CURLOPT_CAINFO_BLOB, &blob);
 #endif
 
-	if (api->umkaGetStrLen(params->header) > 0) {
-		curl_easy_setopt(curl, CURLOPT_HTTPHEADER, params->header);
+	int headerCount = api->umkaGetDynArrayLen(&params->headers);
+	struct curl_slist *headers = NULL;
+	if (headerCount > 0) {
+		for (int i = 0; i < headerCount; i++) {
+			headers = curl_slist_append(headers, params->headers.data[i]);
+		}
+
+		curl_easy_setopt(curl, CURLOPT_HTTPHEADER, headers);
 	}
 
 	if (api->umkaGetStrLen(params->user_agent) > 0) {
@@ -154,6 +171,10 @@ umc__post(UmkaStackSlot *p, UmkaStackSlot *r)
 	if (res != CURLE_OK) {
 		ret->err = api->umkaMakeStr(umka, curl_easy_strerror(res));
 		goto cleanup;
+	}
+
+	if (headerCount > 0) {
+		curl_slist_free_all(headers);
 	}
 
 	curl_easy_getinfo(curl, CURLINFO_RESPONSE_CODE, &ret->code);
