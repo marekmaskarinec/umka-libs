@@ -134,7 +134,7 @@ fn fmt(s: str, args: []any): str {
 		}
 
 		if a >= len(args) {
-			error("sfmt: not enough arguments")
+			exit(1, "sfmt: not enough arguments")
 		}
 
 		o = append(o, []char(sprintf("%v", args[a])))
@@ -145,7 +145,7 @@ fn fmt(s: str, args: []any): str {
 	}
 
 	if a != len(args) {
-		error("sfmt: too many arguments")
+		exit(1, "sfmt: too many arguments")
 	}
 
 	return o
