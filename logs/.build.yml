@@ -1,27 +1,24 @@
 image: debian/bullseye
 packages:
-- python3
-- python3-pip
-sources:
-- https://git.sr.ht/~mrms/logsum
-- https://git.sr.ht/~mrms/pak
-environment:
-  project: logs
+- curl
+- mingw-w64
+- unzip
 secrets:
 - d4867610-238d-4996-9810-b162f92b5ac9
-shell: false
+sources:
+- https://git.sr.ht/~mrms/logsum
+environment:
+    NAME: logsum
 tasks:
 - setup: |
-    cd pak
-    python3 -m pip install -r requirements.txt
-    ./setup.py install --user
+    curl https://mrms.cz/dl/up/umbox_portable.zip -O
+    unzip umbox_portable.zip
 - build: |
-    cd logsum
-    python3 -m pak update
-    python3 -m pak build
+    cd $NAME
+    ../umbox_portable/umbox update
+    ../umbox_portable/umbox build
 - deploy: |
-    cd logsum
+    cd $NAME
     set +x
-    python3 -m pak upload -t `cat ../.secret` pak.tar
-    python3 -m pak upload -t `cat ../.secret` pak.json
+    ../umbox_portable/umbox upload `cat ../.secret` box.tar
     set -x
