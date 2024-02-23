@@ -203,6 +203,29 @@ fn setEnv*(key: str, value: str): Errno {
 	return umc__setenv(key, value)
 }
 
+//~~struct StatBuf
+type StatBuf* = struct {
+//~~
+	mode: uint32
+	uid: uint32
+	gid: uint32
+	size: uint
+	atime: int
+	mtime: int
+	ctime: int
+}
+
+fn umc__stat(path: str, buf: ^StatBuf): Errno
+
+//~~fn stat
+// Get information about a file.
+fn stat*(path: str): (StatBuf, Errno) {
+//~~
+	sb := StatBuf{}
+	err := umc__stat(path, &sb)
+	return sb, err
+}
+
 fn main() {
 	printf("Platform: %d\n", getPlatform())
 	if cwd, errno := getCwd(); errno != 0 {
@@ -223,6 +246,7 @@ fn main() {
 	printf("isdir(\"umbox\")    = %v\n", isdir("umbox"))
 	printf("islink(\"umbox\")   = %v\n", islink("umbox"))
 	printf("islink(\"umbox/filepath/umbox/strings\") = %v\n", islink("umbox/filepath/umbox/strings"))
+	printf("stat(\"os.um\") =\n%v\n", stat("os.um"))
 	
 	printf("Walk dir:\n")
 	if errno := walk(".", fn(file: str) {
