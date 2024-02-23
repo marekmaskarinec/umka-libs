@@ -12,7 +12,7 @@ environment:
     NAME: httpum
 tasks:
 - setup: |
-    curl https://mrms.cz/dl/up/umbox_portable.zip -O
+    curl https://mrms.cz/dl/umbox/umbox_portable.zip -O
     unzip umbox_portable.zip
 - build: |
     cd $NAME
