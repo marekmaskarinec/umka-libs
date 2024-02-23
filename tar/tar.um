@@ -26,7 +26,7 @@ type Tar* = struct{ _: ^struct{} }
 //~~enum Errno
 // Error codes returned by tar functions
 type Errno* = int32
-//
+//~~
 
 fn umc__tar_strerror(err: Errno): str
                                   
