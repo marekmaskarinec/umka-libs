@@ -1,27 +1,24 @@
 image: debian/bullseye
 packages:
-- python3
-- python3-pip
+- curl
+- unzip
 sources:
 - https://git.sr.ht/~mrms/csvum
-- https://git.sr.ht/~mrms/pak
 environment:
-  project: csv
+  NAME: csvum
 secrets:
 - ea6cf562-3087-4c83-8e67-3a4679071242
 shell: false
 tasks:
 - setup: |
-    cd pak
-    python3 -m pip install -r requirements.txt
-    ./setup.py install --user
+    curl https://mrms.cz/dl/umbox/umbox_portable.zip -O
+    unzip umbox_portable.zip
 - build: |
-    cd csvum
-    python3 -m pak update
-    python3 -m pak build
+    cd $NAME
+    ../umbox_portable/umbox update
+    ../umbox_portable/umbox build
 - deploy: |
-    cd csvum
+    cd $NAME
     set +x
-    python3 -m pak upload -t `cat ../.secret` pak.tar
-    python3 -m pak upload -t `cat ../.secret` pak.json
+    ../umbox_portable/umbox upload `cat ../.secret` box.tar
     set -x
