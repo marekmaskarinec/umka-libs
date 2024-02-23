@@ -205,7 +205,6 @@ fn setEnv*(key: str, value: str): Errno {
 
 //~~struct StatBuf
 type StatBuf* = struct {
-//~~
 	mode: uint32
 	uid: uint32
 	gid: uint32
@@ -214,6 +213,7 @@ type StatBuf* = struct {
 	mtime: int
 	ctime: int
 }
+//~~
 
 fn umc__stat(path: str, buf: ^StatBuf): Errno
 
