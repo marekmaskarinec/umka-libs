@@ -8,7 +8,7 @@
     "link": "https://git.sr.ht/~mrms/tarum",
     "dependencies": [
         "os",
-        "filepath"
+        "filepath",
 				"umka_api"
     ],
     "include": [
