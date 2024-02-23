@@ -1,6 +1,6 @@
 
 import (
-        "umbox/filepath/filepath.um"
+	"umbox/filepath/filepath.um"
 )
 
 //~~type Errno
@@ -15,7 +15,7 @@ fn umc__isfile(path: str): bool
 // If the file doesn't exist, returns false.
 fn isfile*(path: str): bool {
 //~~
-        return umc__isfile(path)
+	return umc__isfile(path)
 }
 
 fn umc__isdir(path: str): bool
@@ -25,7 +25,7 @@ fn umc__isdir(path: str): bool
 // If the directory doesn't exist, returns false.
 fn isdir*(path: str): bool {
 //~~
-        return umc__isdir(path)
+	return umc__isdir(path)
 }
 
 fn umc__islink(path: str): bool
@@ -35,7 +35,7 @@ fn umc__islink(path: str): bool
 // If the link doesn't exist, returns false.
 fn islink*(path: str): bool {
 //~~
-        return umc__islink(path)
+	return umc__islink(path)
 }
 
 fn umc__mkdir(path: str): int
@@ -44,7 +44,7 @@ fn umc__mkdir(path: str): int
 // Creates a directory at path. Returns 0 on success, or an errno on failure.
 fn mkdir*(path: str): Errno {
 //~~
-        return umc__mkdir(path)
+	return umc__mkdir(path)
 }
 
 //~~fn mkdirp
@@ -53,23 +53,23 @@ fn mkdir*(path: str): Errno {
 // file.
 fn mkdirp*(path: str): Errno {
 //~~
-        // hack to initialize the library
-        filepath.dir(".")
-                
-        parts := filepath.split(path)
-        accum := ""
-        for i in parts {
-                accum += parts[i] + str(filepath.fileseparator)
-                if isfile(accum) {
-                        return 37 // EALREADY
-                }
-                
-                if !isdir(accum) {
-                        mkdir(accum)
-                }
-        }
-        
-        return 0
+	// hack to initialize the library
+	filepath.dir(".")
+		
+	parts := filepath.split(path)
+	accum := ""
+	for i in parts {
+		accum += parts[i] + str(filepath.fileseparator)
+		if isfile(accum) {
+			return 37 // EALREADY
+		}
+		
+		if !isdir(accum) {
+			mkdir(accum)
+		}
+	}
+	
+	return 0
 }
 
 fn umc__remove(path: str): int
@@ -78,16 +78,16 @@ fn umc__remove(path: str): int
 // Removes a file at path. Returns 0 on success, or an errno on failure.
 fn remove*(path: str): Errno {
 //~~
-        return umc__remove(path)
+	return umc__remove(path)
 }
 
 fn umc__strerror(errno: int): str
-                              
+			      
 //~~fn strerror
 // Returns a string describing the given errno.
 fn strerror*(errno: Errno): str {
 //~~
-        return umc__strerror(errno)
+	return umc__strerror(errno)
 }
 
 fn umc__link(target: str, link: str): int
@@ -97,26 +97,26 @@ fn umc__link(target: str, link: str): int
 // an errno on failure.
 fn link*(target: str, link: str): Errno {
 //~~
-        return umc__link(target, link)
+	return umc__link(target, link)
 }
 
 fn umc__listdir(path: str, arr: ^[]str, strArrType: ^void): int
-                                          
+					  
 //~~fn listdir
 // Returns a list of files in the given directory, second argument is 0 on
 // success or an errno on failure.
 fn listdir*(path: str): ([]str, Errno) {
 //~~
-        var files: []str
-        err := umc__listdir(path, &files, typeptr([]str))
-        return files, err
+	var files: []str
+	err := umc__listdir(path, &files, typeptr([]str))
+	return files, err
 }
 
 //~~struct WalkArgs
 // Arguments to the walk function.
 type WalkArgs* = struct {
-        excludeDirs: bool // if true, directories will not be walked
-        skipLinks: bool   // if true, symbolic links will not be walked
+	excludeDirs: bool // if true, directories will not be walked
+	skipLinks: bool   // if true, symbolic links will not be walked
 }
 //~~
 
@@ -124,19 +124,19 @@ type WalkArgs* = struct {
 // Walks the given directory, calling the given callback for each file.
 fn walk*(dir: str, cb: fn(file: str), args: WalkArgs = {}): Errno {
 //~~
-        files, errno := listdir(dir)
-        if errno != 0 {
-                return errno
-        }
+	files, errno := listdir(dir)
+	if errno != 0 {
+		return errno
+	}
 
-        for i,f in files {
-                if f == "." || f == ".." {
-                        continue
-                }
+	for i,f in files {
+		if f == "." || f == ".." {
+			continue
+		}
 
-                fullpath := filepath.join(dir, f)
+		fullpath := filepath.join(dir, f)
 
-                if isdir(fullpath) {
+		if isdir(fullpath) {
 			if !(args.skipLinks && islink(fullpath)) {
 				walk(fullpath, cb, args)
 			}
@@ -144,12 +144,12 @@ fn walk*(dir: str, cb: fn(file: str), args: WalkArgs = {}): Errno {
 			if !args.excludeDirs {
 				cb(fullpath)
 			}
-                } else {
-                        cb(fullpath)
-                }
-        }
+		} else {
+			cb(fullpath)
+		}
+	}
 
-        return 0
+	return 0
 }
 
 fn umc__chmod(path: str, mode: int): int
@@ -159,17 +159,17 @@ fn umc__chmod(path: str, mode: int): int
 // errno on failure.
 fn chmod*(path: str, mode: int): Errno {
 //~~
-        return umc__chmod(path, mode)
+	return umc__chmod(path, mode)
 }
 
 //~~enum Platform
 // The platform the program is running on.
 type Platform* = int
 const (
-        PlatformPosix* = Platform(0)
-        PlatformWindows*
-        PlatformEmscripten*
-        PlatformUnknown*
+	PlatformPosix* = Platform(0)
+	PlatformWindows*
+	PlatformEmscripten*
+	PlatformUnknown*
 )
 //~~
 
@@ -179,7 +179,7 @@ fn umc__get_plat(): Platform
 // Returns the platform the program is running on.
 fn getPlatform*(): Platform {
 //~~
-        return umc__get_plat()
+	return umc__get_plat()
 }
 
 fn umc__getcwd(out: ^str): Errno
@@ -188,9 +188,9 @@ fn umc__getcwd(out: ^str): Errno
 // Returns the current working directory.
 fn getCwd*(): (str, Errno) {
 //~~
-        var out: str
-        errno := umc__getcwd(&out)
-        return out, errno
+	var out: str
+	errno := umc__getcwd(&out)
+	return out, errno
 }
 
 fn umc__setenv(key: str, value: str): int
@@ -200,40 +200,40 @@ fn umc__setenv(key: str, value: str): int
 // success, or an errno on failure.
 fn setEnv*(key: str, value: str): Errno {
 //~~
-        return umc__setenv(key, value)
+	return umc__setenv(key, value)
 }
 
 fn main() {
-        printf("Platform: %d\n", getPlatform())
-        if cwd, errno := getCwd(); errno != 0 {
-                printf("getCwd failed: %s\n", strerror(errno))
-        } else {
-                printf("Cwd: %s\n", cwd)
-        }
+	printf("Platform: %d\n", getPlatform())
+	if cwd, errno := getCwd(); errno != 0 {
+		printf("getCwd failed: %s\n", strerror(errno))
+	} else {
+		printf("Cwd: %s\n", cwd)
+	}
 
-        mkdir("test")
-                
-        if errno := remove("test"); errno != 0 {
-                printf("rmfile failed: %v\n", strerror(errno))
-        }
+	mkdir("test")
+		
+	if errno := remove("test"); errno != 0 {
+		printf("rmfile failed: %v\n", strerror(errno))
+	}
  
-        printf("isfile(\"os.um\") = %v\n", isfile("os.um"))
-        printf("isdir(\"os.um\")  = %v\n", isdir("os.um"))
-        printf("isfile(\"umbox\")   = %v\n", isfile("umbox"))
-        printf("isdir(\"umbox\")    = %v\n", isdir("umbox"))
-        printf("islink(\"umbox\")   = %v\n", islink("umbox"))
-        printf("islink(\"umbox/filepath/umbox/strings\") = %v\n", islink("umbox/filepath/umbox/strings"))
-        
-        printf("Walk dir:\n")
-        if errno := walk(".", fn(file: str) {
-                printf("\t%v\n", file)
-        }, { skipLinks: true }); errno != 0 {
-                printf("walk failed: %v\n", strerror(errno))
-        }
-        
-        mkdirp("test/one/two/three")
-        if errno := link("../../two", "test/one/two/three/four"); errno != 0 {
-                printf("link failed: %v\n", strerror(errno))
-        }
-        chmod("test", 0744)
+	printf("isfile(\"os.um\") = %v\n", isfile("os.um"))
+	printf("isdir(\"os.um\")  = %v\n", isdir("os.um"))
+	printf("isfile(\"umbox\")   = %v\n", isfile("umbox"))
+	printf("isdir(\"umbox\")    = %v\n", isdir("umbox"))
+	printf("islink(\"umbox\")   = %v\n", islink("umbox"))
+	printf("islink(\"umbox/filepath/umbox/strings\") = %v\n", islink("umbox/filepath/umbox/strings"))
+	
+	printf("Walk dir:\n")
+	if errno := walk(".", fn(file: str) {
+		printf("\t%v\n", file)
+	}, { skipLinks: true }); errno != 0 {
+		printf("walk failed: %v\n", strerror(errno))
+	}
+	
+	mkdirp("test/one/two/three")
+	if errno := link("../../two", "test/one/two/three/four"); errno != 0 {
+		printf("link failed: %v\n", strerror(errno))
+	}
+	chmod("test", 0744)
 }
