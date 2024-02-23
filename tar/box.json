@@ -7,9 +7,9 @@
     "readme": "README.md",
     "link": "https://git.sr.ht/~mrms/tarum",
     "dependencies": [
-        "umka",
         "os",
         "filepath"
+				"umka_api"
     ],
     "include": [
         "tar.um",
