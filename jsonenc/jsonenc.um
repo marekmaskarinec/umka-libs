@@ -99,7 +99,7 @@ fn (this: ^Encoder) endObject*() {
 
 	this.putComma = true
 	if this.nestLevel < 0 {
-		error("Incorrect nesting")
+		exit(1, "Incorrect nesting")
 	}
 
 	this.state = slice(this.state, 0, len(this.state) - 1)
@@ -132,7 +132,7 @@ fn (this: ^Encoder) endArray*() {
 
 	this.putComma = true
 	if this.nestLevel < 0 {
-		error("Incorrect nesting")
+		exit(1, "Incorrect nesting")
 	}
 
 	this.state = slice(this.state, 0, len(this.state) - 1)
