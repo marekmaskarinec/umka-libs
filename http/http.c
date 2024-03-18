@@ -29,24 +29,41 @@ struct Response
 	char *err;
 	int64_t code;
 	char *content_type;
+	UmkaDynArray(char) body;
 };
 
-struct memory
+struct wbuf
 {
-	struct ioum_reader_writer rw;
-	uint8_t *data;
-	size_t cap;
-	size_t writePtr;
-	size_t readPtr;
+	char *str;
+	int len;
+	int cap;
 };
 
 static size_t
-writefn(char *ptr, size_t size, size_t nmemb, struct ioum_writer *w)
+writefn(char *ptr, size_t size, size_t nmemb, struct wbuf *b)
 {
-	return w->write(w, ptr, size * nmemb);
+	if (b->len + nmemb < b->cap) {
+		memcpy(b->str + b->len, ptr, nmemb);
+		b->len += nmemb;
+		return nmemb;
+	}
+
+	if (b->len + nmemb < b->cap * 2) {
+		b->str = realloc(b->str, b->cap *= 2);
+		memcpy(b->str + b->len, ptr, nmemb);
+		b->len += nmemb;
+		return nmemb;
+	}
+
+	b->cap = (b->len + nmemb) * 2;
+	b->str = realloc(b->str, b->cap);
+	memcpy(b->str + b->len, ptr, nmemb);
+	b->len += nmemb;
+
+	return nmemb;
 }
 
-// fn umc__get(url: str, params: ^GetParams, out: ^Response, typeofbytes: ^void)
+// fn umc__get(url: str, params: ^GetParams, out: ^Response, typeof: ^void)
 void
 umc__get(UmkaStackSlot *p, UmkaStackSlot *r)
 {
@@ -55,7 +72,7 @@ umc__get(UmkaStackSlot *p, UmkaStackSlot *r)
 	char *url = p[3].ptrVal;
 	struct GetParams *params = p[2].ptrVal;
 	struct Response *ret = p[1].ptrVal;
-	struct ioum_writer *w = *(struct ioum_writer **)p[0].ptrVal;
+	void *typeptr = p[0].ptrVal;
 	ret->ok = false;
 
 	CURL *curl = curl_easy_init();
@@ -64,11 +81,16 @@ umc__get(UmkaStackSlot *p, UmkaStackSlot *r)
 		return;
 	}
 
+	struct wbuf b = {
+	    .str = calloc(32, sizeof(char)),
+	    .cap = 32,
+	};
+
 	CURLcode res;
 	curl_easy_setopt(curl, CURLOPT_URL, url);
 	curl_easy_setopt(curl, CURLOPT_FOLLOWLOCATION, 1L);
 	curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, writefn);
-	curl_easy_setopt(curl, CURLOPT_WRITEDATA, w);
+	curl_easy_setopt(curl, CURLOPT_WRITEDATA, &b);
 
 #ifdef _WIN32
 	struct curl_blob blob = {0};
@@ -106,30 +128,32 @@ umc__get(UmkaStackSlot *p, UmkaStackSlot *r)
 	char *content_type;
 	curl_easy_getinfo(curl, CURLINFO_CONTENT_TYPE, &content_type);
 
+	b.str[b.len] = 0;
+
 	ret->ok = true;
+
+	api->umkaMakeDynArray(umka, &ret->body, typeptr, b.len);
+	memcpy(ret->body.data, b.str, b.len);
 	ret->content_type = api->umkaMakeStr(umka, content_type);
 
 cleanup:
+	free(b.str);
 	curl_easy_cleanup(curl);
 }
 
-static size_t
-readfn(void *ptr, size_t size, size_t nmemb, struct ioum_reader *r)
-{
-	return r->read(r, ptr, size * nmemb);
-}
-
-// fn umc__post(url: str, body: str, params: ^GetParams, out: ^Response, typeofbytes: ^void)
+// fn umc__post(url: str, body: ^[]char, params: ^GetParams, out: ^Response, typeofbytes: ^void)
 void
 umc__post(UmkaStackSlot *p, UmkaStackSlot *r)
 {
 	void *umka = r->ptrVal;
 	UmkaAPI *api = umkaGetAPI(umka);
+
 	char *url = p[4].ptrVal;
-	struct PostParams *params = p[3].ptrVal;
-	struct Response *ret = p[2].ptrVal;
-	struct ioum_reader *reader = *(struct ioum_reader **)p[1].ptrVal;
-	struct ioum_writer *w = *(struct ioum_writer **)p[0].ptrVal;
+	UmkaDynArray(char) *body = p[3].ptrVal;
+	struct PostParams *params = p[2].ptrVal;
+	struct Response *ret = p[1].ptrVal;
+	void *typeptr = p[0].ptrVal;
+
 	ret->ok = false;
 
 	CURL *curl = curl_easy_init();
@@ -138,13 +162,17 @@ umc__post(UmkaStackSlot *p, UmkaStackSlot *r)
 		return;
 	}
 
+	struct wbuf b = {
+	    .str = calloc(32, sizeof(char)),
+	    .cap = 32,
+	};
+
 	curl_easy_setopt(curl, CURLOPT_URL, url);
 	curl_easy_setopt(curl, CURLOPT_FOLLOWLOCATION, 1L);
-	curl_easy_setopt(curl, CURLOPT_POST, 1L);
-	curl_easy_setopt(curl, CURLOPT_READFUNCTION, readfn);
-	curl_easy_setopt(curl, CURLOPT_READDATA, reader);
+	curl_easy_setopt(curl, CURLOPT_POSTFIELDS, body->data);
+	curl_easy_setopt(curl, CURLOPT_POSTFIELDSIZE, api->umkaGetDynArrayLen(body));
 	curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, writefn);
-	curl_easy_setopt(curl, CURLOPT_WRITEDATA, w);
+	curl_easy_setopt(curl, CURLOPT_WRITEDATA, &b);
 
 #ifdef _WIN32
 	struct curl_blob blob = {0};
@@ -181,9 +209,15 @@ umc__post(UmkaStackSlot *p, UmkaStackSlot *r)
 	char *content_type;
 	curl_easy_getinfo(curl, CURLINFO_CONTENT_TYPE, &content_type);
 
+	b.str[b.len] = 0;
+
+	api->umkaMakeDynArray(umka, &ret->body, typeptr, b.len);
+	memcpy(ret->body.data, b.str, b.len);
+
 	ret->content_type = api->umkaMakeStr(umka, content_type);
 	ret->ok = true;
 
 cleanup:
+	free(b.str);
 	curl_easy_cleanup(curl);
 }

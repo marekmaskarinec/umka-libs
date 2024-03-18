@@ -7,8 +7,7 @@
     "readme": "README.md",
     "link": "https://git.sr.ht/~mrms/httpum",
     "dependencies": [
-        "umka",
-        "io"
+        "umka"
     ],
     "include": [
         "http.um",
