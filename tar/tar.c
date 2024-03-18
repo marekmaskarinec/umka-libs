@@ -91,6 +91,10 @@ umc__tar_open_bytes(UmkaStackSlot *p, UmkaStackSlot *r)
 	*out = api->umkaAllocData(umka, sizeof(mtar_t), NULL);
 	size_t bytes_len = api->umkaGetDynArrayLen(bytes_in);
 	uint8_t *bytes = malloc(bytes_len);
+	if (bytes == NULL) {
+		r->intVal = MTAR_EFAILURE;
+		return;
+	}
 	memcpy(bytes, bytes_in->data, bytes_len);
 
 	**out = (mtar_t){
@@ -218,6 +222,8 @@ umc__tar_add_file(UmkaStackSlot *p, UmkaStackSlot *r)
 	fread(buf, 1, size, f);
 
 	r->intVal = mtar_write_data(tar, buf, size);
+	free(buf);
+	fclose(f);
 }
 
 // fn umc__tar_close(tar: ^struct{}): int
