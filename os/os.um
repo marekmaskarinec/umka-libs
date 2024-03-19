@@ -1,12 +1,21 @@
 
 import (
+	"std.um"
 	"umbox/filepath/filepath.um"
 )
 
-//~~type Errno
-// An errno is a number that represents an error. It is 0 on success.
 type Errno* = int
-//~~
+
+fn umc__strerror(errno: int): str
+			      
+fn strerror*(errno: Errno): str {
+	if errno == 0 { return "" }
+	return umc__strerror(errno)
+}
+
+fn errFromErrno(e: Errno): std.Err {
+	return std.error(e, strerror(e), "os.um")
+}
 
 fn umc__isfile(path: str): bool
 
@@ -42,16 +51,17 @@ fn umc__mkdir(path: str): int
 
 //~~fn mkdir
 // Creates a directory at path. Returns 0 on success, or an errno on failure.
-fn mkdir*(path: str): Errno {
+fn mkdir*(path: str): std.Err {
 //~~
-	return umc__mkdir(path)
+	err := umc__mkdir(path)
+	return errFromErrno(err)
 }
 
 //~~fn mkdirp
 // If the directory at path doesn't exist, creates it and all parent
 // directories. Returns EALREADY if part of the path already exists and is a
 // file.
-fn mkdirp*(path: str): Errno {
+fn mkdirp*(path: str): std.Err {
 //~~
 	// hack to initialize the library
 	filepath.dir(".")
@@ -61,33 +71,27 @@ fn mkdirp*(path: str): Errno {
 	for i in parts {
 		accum += parts[i] + str(filepath.fileseparator)
 		if isfile(accum) {
-			return 37 // EALREADY
+			return errFromErrno(37) // EALREADY
 		}
 		
 		if !isdir(accum) {
-			mkdir(accum)
+			err := mkdir(accum)
+			if err.code != 0 {
+				return err
+			}
 		}
 	}
 	
-	return 0
+	return {}
 }
 
 fn umc__remove(path: str): int
 
 //~~fn remove
 // Removes a file at path. Returns 0 on success, or an errno on failure.
-fn remove*(path: str): Errno {
+fn remove*(path: str): std.Err {
 //~~
-	return umc__remove(path)
-}
-
-fn umc__strerror(errno: int): str
-			      
-//~~fn strerror
-// Returns a string describing the given errno.
-fn strerror*(errno: Errno): str {
-//~~
-	return umc__strerror(errno)
+	return errFromErrno(umc__remove(path))
 }
 
 fn umc__link(target: str, link: str): int
@@ -95,9 +99,9 @@ fn umc__link(target: str, link: str): int
 //~~fn link
 // Creates a symbolic link at link pointing to target. Returns 0 on success, or
 // an errno on failure.
-fn link*(target: str, link: str): Errno {
+fn link*(target: str, link: str): std.Err {
 //~~
-	return umc__link(target, link)
+	return errFromErrno(umc__link(target, link))
 }
 
 fn umc__listdir(path: str, arr: ^[]str, strArrType: ^void): int
@@ -105,11 +109,11 @@ fn umc__listdir(path: str, arr: ^[]str, strArrType: ^void): int
 //~~fn listdir
 // Returns a list of files in the given directory, second argument is 0 on
 // success or an errno on failure.
-fn listdir*(path: str): ([]str, Errno) {
+fn listdir*(path: str): ([]str, std.Err) {
 //~~
 	var files: []str
 	err := umc__listdir(path, &files, typeptr([]str))
-	return files, err
+	return files, errFromErrno(err)
 }
 
 //~~struct WalkArgs
@@ -122,11 +126,11 @@ type WalkArgs* = struct {
 
 //~~fn walk
 // Walks the given directory, calling the given callback for each file.
-fn walk*(dir: str, cb: fn(file: str), args: WalkArgs = {}): Errno {
+fn walk*(dir: str, cb: fn(file: str), args: WalkArgs = {}): std.Err {
 //~~
-	files, errno := listdir(dir)
-	if errno != 0 {
-		return errno
+	files, err := listdir(dir)
+	if err.code != 0 {
+		return err
 	}
 
 	for i,f in files {
@@ -138,7 +142,10 @@ fn walk*(dir: str, cb: fn(file: str), args: WalkArgs = {}): Errno {
 
 		if isdir(fullpath) {
 			if !(args.skipLinks && islink(fullpath)) {
-				walk(fullpath, cb, args)
+				err = walk(fullpath, cb, args)
+				if err.code != 0 {
+					return err
+				}
 			}
 
 			if !args.excludeDirs {
@@ -149,7 +156,7 @@ fn walk*(dir: str, cb: fn(file: str), args: WalkArgs = {}): Errno {
 		}
 	}
 
-	return 0
+	return {}
 }
 
 fn umc__chmod(path: str, mode: int): int
@@ -157,20 +164,19 @@ fn umc__chmod(path: str, mode: int): int
 //~~fn chmod
 // Changes the permissions of the given file. Returns 0 on success, or an
 // errno on failure.
-fn chmod*(path: str, mode: int): Errno {
+fn chmod*(path: str, mode: int): std.Err {
 //~~
-	return umc__chmod(path, mode)
+	return errFromErrno(umc__chmod(path, mode))
 }
 
 //~~enum Platform
 // The platform the program is running on.
-type Platform* = int
-const (
-	PlatformPosix* = Platform(0)
-	PlatformWindows*
-	PlatformEmscripten*
-	PlatformUnknown*
-)
+type Platform* = enum {
+	posix
+	windows
+	emscripten
+	unknown
+}
 //~~
 
 fn umc__get_plat(): Platform
@@ -186,11 +192,11 @@ fn umc__getcwd(out: ^str): Errno
 
 //~~fn getCwd
 // Returns the current working directory.
-fn getCwd*(): (str, Errno) {
+fn getCwd*(): (str, std.Err) {
 //~~
 	var out: str
 	errno := umc__getcwd(&out)
-	return out, errno
+	return out, errFromErrno(errno)
 }
 
 fn umc__setenv(key: str, value: str): int
@@ -198,9 +204,9 @@ fn umc__setenv(key: str, value: str): int
 //~~fn setEnv
 // Sets the given environment variable to the given value. Returns 0 on
 // success, or an errno on failure.
-fn setEnv*(key: str, value: str): Errno {
+fn setEnv*(key: str, value: str): std.Err {
 //~~
-	return umc__setenv(key, value)
+	return errFromErrno(umc__setenv(key, value))
 }
 
 //~~struct StatBuf
@@ -219,25 +225,25 @@ fn umc__stat(path: str, buf: ^StatBuf): Errno
 
 //~~fn stat
 // Get information about a file.
-fn stat*(path: str): (StatBuf, Errno) {
+fn stat*(path: str): (StatBuf, std.Err) {
 //~~
 	sb := StatBuf{}
 	err := umc__stat(path, &sb)
-	return sb, err
+	return sb, errFromErrno(err)
 }
 
 fn main() {
 	printf("Platform: %d\n", getPlatform())
-	if cwd, errno := getCwd(); errno != 0 {
-		printf("getCwd failed: %s\n", strerror(errno))
+	if cwd, err := getCwd(); err.code != 0 {
+		std.exitif(err)
 	} else {
 		printf("Cwd: %s\n", cwd)
 	}
 
 	mkdir("test")
 		
-	if errno := remove("test"); errno != 0 {
-		printf("rmfile failed: %v\n", strerror(errno))
+	if err := remove("test"); err.code != 0 {
+		printf("Error: %s (code %d) in %v\n", err.msg, err.code, err.sender)
 	}
  
 	printf("isfile(\"os.um\") = %v\n", isfile("os.um"))
@@ -249,15 +255,15 @@ fn main() {
 	printf("stat(\"os.um\") =\n%v\n", stat("os.um"))
 	
 	printf("Walk dir:\n")
-	if errno := walk(".", fn(file: str) {
+	if err := walk(".", fn(file: str) {
 		printf("\t%v\n", file)
-	}, { skipLinks: true }); errno != 0 {
-		printf("walk failed: %v\n", strerror(errno))
+	}, { skipLinks: true }); err.code != 0 {
+		printf("Error: %s (code %d) in %v\n", err.msg, err.code, err.sender)
 	}
 	
 	mkdirp("test/one/two/three")
-	if errno := link("../../two", "test/one/two/three/four"); errno != 0 {
-		printf("link failed: %v\n", strerror(errno))
+	if err := link("../../two", "test/one/two/three/four"); err.code != 0 {
+		printf("Error: %s (code %d) in %v\n", err.msg, err.code, err.sender)
 	}
 	chmod("test", 0744)
 }
