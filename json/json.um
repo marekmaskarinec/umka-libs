@@ -96,7 +96,7 @@ fn (l: ^lexer) lex_space(): str {
 }
 
 fn (l: ^lexer) lex_next(): (token, bool) {
-	for l.pos < l.len && (l.inp[l.pos] == ' ' || l.inp[l.pos] == '\n' || l.inp[l.pos] == '\t') {
+	for l.pos < l.len && (l.inp[l.pos] == ' ' || l.inp[l.pos] == '\n' || l.inp[l.pos] == '\r' || l.inp[l.pos] == '\t') {
 		if l.inp[l.pos] == '\n' {
 			l.lineno++
 		}
