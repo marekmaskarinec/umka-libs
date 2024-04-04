@@ -250,6 +250,8 @@ fn main() {
 	printf("isdir(\"os.um\")  = %v\n", isdir("os.um"))
 	printf("isfile(\"umbox\")   = %v\n", isfile("umbox"))
 	printf("isdir(\"umbox\")    = %v\n", isdir("umbox"))
+	printf("isdir(\"umbox/\")    = %v\n", isdir("umbox/"))
+	printf("isdir(\"umbox\\\")    = %v\n", isdir("umbox\\"))
 	printf("islink(\"umbox\")   = %v\n", islink("umbox"))
 	printf("islink(\"umbox/filepath/umbox/strings\") = %v\n", islink("umbox/filepath/umbox/strings"))
 	printf("stat(\"os.um\") =\n%v\n", stat("os.um"))

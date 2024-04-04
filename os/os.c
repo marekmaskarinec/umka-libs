@@ -181,6 +181,12 @@ void
 umc__isdir(UmkaStackSlot *p, UmkaStackSlot *r)
 {
 	char *path = p[0].ptrVal;
+	for (size_t i = strlen(path) - 1; i > 0; i--) {
+		if (path[i] != '/' && path[i] != '\\')
+			break;
+		path[i] = 0;
+	}
+
 	r->intVal = 0;
 
 	struct stat st;
