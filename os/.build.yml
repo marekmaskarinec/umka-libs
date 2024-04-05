@@ -11,7 +11,7 @@ environment:
     NAME: osum
 tasks:
 - setup: |
-    curl https://mrms.cz/dl/umbox/umbox_portable.zip -O
+    curl https://mrms.cz/dl/umbox/umbox_portable_v12.zip -o umbox_portable.zip
     unzip umbox_portable.zip
 - build: |
     cd $NAME
