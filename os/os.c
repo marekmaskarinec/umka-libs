@@ -180,7 +180,7 @@ umc__isfile(UmkaStackSlot *p, UmkaStackSlot *r)
 void
 umc__isdir(UmkaStackSlot *p, UmkaStackSlot *r)
 {
-	char *path = p[0].ptrVal;
+	char *path = strdup(p[0].ptrVal);
 	for (size_t i = strlen(path) - 1; i > 0; i--) {
 		if (path[i] != '/' && path[i] != '\\')
 			break;
@@ -191,9 +191,12 @@ umc__isdir(UmkaStackSlot *p, UmkaStackSlot *r)
 
 	struct stat st;
 	if (stat(path, &st))
-		return;
+		goto cleanup;
 
 	r->intVal = S_ISDIR(st.st_mode);
+
+cleanup:
+	free(path);
 }
 
 // fn umc__islink(path: str): bool
