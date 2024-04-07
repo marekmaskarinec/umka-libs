@@ -71,11 +71,10 @@ fn (this: ^FileBackend) close*() {
 
 //~~fn mkFileBackend
 // Creates a `FileBackend`. If `rewrite` is false, the file will be appended.
-fn mkFileBackend*(path: str, rewrite: bool = false): FileBackend {
+fn mkFileBackend*(path: str, rewrite: bool = false): (FileBackend, std.Err) {
 //~~
-	return {
-		std.fopen(path, rewrite ? "w" : "a")
-	}
+	f, err := std.fopen(path, rewrite ? "w" : "a")
+	return { f }, err
 }
 
 var (
@@ -232,7 +231,9 @@ fn main() {
 	sus(TAG, "Suspicious log")
 	err(TAG, "Error log")
 
-	setBackend(mkFileBackend("log.txt", true))
+	fb, e := mkFileBackend("log.txt", true)
+	std.exitif(e)
+	setBackend(fb)
 	dbg("debug.um", "Debug log")
 	dbg(TAG, "Debug log")
 	inf(TAG, "Information log")
