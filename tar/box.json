@@ -18,5 +18,5 @@
     ],
     "pre_build": "make",
     "run_posix": "make run",
-    "run_windows": "./pak/umka/windows/umka.exe tar.um"
+    "run_windows": "./pak/umka/umka.exe tar.um"
 }

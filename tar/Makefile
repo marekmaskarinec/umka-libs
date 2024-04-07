@@ -1,7 +1,7 @@
 
 CROSS_CC=x86_64-w64-mingw32-gcc
 NAME=tar
-UMKA=./umbox/umka/linux/umka
+UMKA=umka
 CFLAGS= \
 	-Wall \
 	-Wno-unused-label \

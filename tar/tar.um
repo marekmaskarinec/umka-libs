@@ -5,6 +5,29 @@ import (
 	"std.um"
 )
 
+type Errno = enum {
+	success = 0
+	failure = -1
+	openFail = -2
+	readFail = -3
+	writeFail = -4
+	seekFail = -5
+	badChecksum = -6
+	nullRecord = -7
+	notFound = -8
+}
+
+fn umc__tar_strerror(err: Errno): str
+								  
+fn strerror(err: Errno): str {
+	if int(err) == 0 { return "" }
+	return umc__tar_strerror(err)
+}
+
+fn errFromErrno(e: Errno): std.Err {
+	return std.error(int(e), strerror(e), "tar.um")
+}
+
 //~~struct File
 // Struct representing a file in a tar archive.
 type File* = struct {
@@ -23,15 +46,6 @@ type File* = struct {
 type Tar* = struct{ _: ^struct{} }
 //~~
 
-type Errno* = int32
-
-fn umc__tar_strerror(err: Errno): str
-								  
-fn strerror*(err: Errno): str {
-	if err == 0 { return "" }
-	return umc__tar_strerror(err)
-}
-
 fn umc__tar_open(path: str, mode: str, out: ^Tar): Errno
 														
 //~~fn open
@@ -40,7 +54,7 @@ fn open*(path: str, mode: str): (Tar, std.Err) {
 //~~
 	var t: Tar
 	err := umc__tar_open(path, mode, &t)
-	return t, std.error(err, strerror(err))
+	return t, errFromErrno(err)
 }
 
 fn umc__tar_open_bytes(dat: ^[]uint8, out: ^Tar): Errno
@@ -51,7 +65,7 @@ fn openBytes*(dat: []uint8): (Tar, std.Err) {
 //~~
 	var t: Tar
 	err := umc__tar_open_bytes(&dat, &t)
-	return t, std.error(err, strerror(err))
+	return t, errFromErrno(err)
 }
 
 fn umc__tar_close(tar: ^struct{}): Errno
@@ -61,7 +75,7 @@ fn umc__tar_close(tar: ^struct{}): Errno
 fn (t: ^Tar) close*(): std.Err {
 //~~
 	err := umc__tar_close(t._)
-		return std.error(err, strerror(err))
+		return errFromErrno(err)
 }
 
 fn umc__tar_get_files(tar: ^struct{}, out: ^[]File, fileArrType: ^void): Errno
@@ -72,7 +86,7 @@ fn (t: ^Tar) getFiles*(): ([]File, std.Err) {
 //~~
 	var files: []File
 	err := umc__tar_get_files(t._, &files, typeptr([]File))
-	return files, std.error(err, strerror(err))
+	return files, errFromErrno(err)
 }
 
 fn umc__tar_read(tar: ^struct{}, path: str, out: ^[]char, bytesArrType: ^void): Errno
@@ -83,7 +97,7 @@ fn (t: ^Tar) read*(path: str): ([]char, std.Err) {
 //~~
 	var s: []char
 	err := umc__tar_read(t._, path, &s, typeptr([]char))
-	return s, std.error(err, strerror(err))
+	return s, errFromErrno(err)
 }
 
 //~~fn extract
@@ -140,7 +154,7 @@ fn umc__tar_finalize(t: ^struct{}): Errno
 fn (t: ^Tar) finalize*(): std.Err {
 //~~
 	err :=  umc__tar_finalize(t._)
-	return std.error(err, strerror(err))
+	return errFromErrno(err)
 }
 
 fn main() {
@@ -150,7 +164,7 @@ fn main() {
 	tar, err = open("test.tar", "w")
 	std.exitif(err)
 	
-	tar.addFile("umbox.json")
+	tar.addFile("box.json")
 	tar.addFile("microtar/README.md")
 	tar.addFile("tar_linux.umi")
 	

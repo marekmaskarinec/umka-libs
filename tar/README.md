@@ -1,58 +1,53 @@
 # tar.um
 
 A tar archive library for Umka. Install using
-[PAK](https://pak.tophat2d.dev/package/tar).
+[UmBox](https://umbox.tophat2d.dev/package/tar).
 
 ## Example
 
 ```
 import (
-        "pak/tar/tar.um"
+    "std.um"
+    mtar = "umbox/tar/tar.um"
 )
 
-fn main() {
-    var err: tar.Errno
-    var t: tar.Tar
+fn main() {  
+    tar, err := mtar.open("test.tar", "wb")
+    std.exitif(err)
+    
+    tar.addFile("box.json")
+    tar.addFile("umbox/tar/README.md")
+    tar.addFile("umbox/tar/tar_linux.umi")
+    
+    err = tar.finalize()
+    std.exitif(err)
+    
+    err = tar.close()
+    std.exitif(err)
+    
+    tar, err = mtar.open("test.tar", "rb")
+    std.exitif(err)
+    
+    files, err := tar.getFiles()
+    std.exitif(err)
+    
+    printf("Files in tar file:\n")
+    for i in files {
+        printf("  %s\n", files[i].name)
+    }
+    
+    testName := "box.json"
+    printf("Reading " + testName + ":\n")
+    umboxJson, err := tar.read(testName)
+    std.exitif(err)
+
+    printf("%s\n", str([]char(umboxJson)))
         
-    t, err = tar.open("test.tar", "w")
-    if err != 0 {
-        printf("Error opening tar file: %s\n", tar.strerror(err))
-        return
-    }
+    err = tar.extract("extracted")
+    std.exitif(err)
     
-    t.addFile("pak.json")
-    t.addFile("pak/")
-    t.addFile("README.md")
-    
-    err = t.finalize()
-    if err != 0 {
-        printf("Error finalizing tar file: %s\n", tar.strerror(err))
-        return
-    }
-    
-    err = t.close()
-    if err != 0 {
-        printf("Error closing tar file: %s\n", tar.strerror(err))
-        return
-    }
-    
-    t, err = tar.open("test.tar", "r")
-    if err != 0 {
-        printf("Error opening tar file: %s\n", tar.strerror(err))
-        return
-    }
-        
-    err = t.extract("extracted")
-    if err != 0 {
-        printf("Error extracting tar file: %s\n", tar.strerror(err))
-        return
-    }
-    
-    err = t.close()
-    if err != 0 {
-        printf("Error closing tar file: %s\n", tar.strerror(err))
-        return
-    }
+    err = tar.close()
+    std.exitif(err)
 }
 ```
 
