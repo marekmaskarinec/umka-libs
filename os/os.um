@@ -13,8 +13,8 @@ fn strerror*(errno: Errno): str {
 	return umc__strerror(errno)
 }
 
-fn errFromErrno(e: Errno): std.Err {
-	return std.error(e, strerror(e), "os.um")
+fn errFromErrno(e: Errno): std::Err {
+	return std::error(e, strerror(e), "os.um")
 }
 
 fn umc__isfile(path: str): bool
@@ -51,7 +51,7 @@ fn umc__mkdir(path: str): int
 
 //~~fn mkdir
 // Creates a directory at path. Returns 0 on success, or an errno on failure.
-fn mkdir*(path: str): std.Err {
+fn mkdir*(path: str): std::Err {
 //~~
 	err := umc__mkdir(path)
 	return errFromErrno(err)
@@ -61,15 +61,15 @@ fn mkdir*(path: str): std.Err {
 // If the directory at path doesn't exist, creates it and all parent
 // directories. Returns EALREADY if part of the path already exists and is a
 // file.
-fn mkdirp*(path: str): std.Err {
+fn mkdirp*(path: str): std::Err {
 //~~
 	// hack to initialize the library
-	filepath.dir(".")
+	filepath::dir(".")
 		
-	parts := filepath.split(path)
+	parts := filepath::split(path)
 	accum := ""
 	for i in parts {
-		accum += parts[i] + str(filepath.fileseparator)
+		accum += parts[i] + str(filepath::fileseparator)
 		if isfile(accum) {
 			return errFromErrno(37) // EALREADY
 		}
@@ -89,7 +89,7 @@ fn umc__remove(path: str): int
 
 //~~fn remove
 // Removes a file at path. Returns 0 on success, or an errno on failure.
-fn remove*(path: str): std.Err {
+fn remove*(path: str): std::Err {
 //~~
 	return errFromErrno(umc__remove(path))
 }
@@ -99,7 +99,7 @@ fn umc__link(target: str, link: str): int
 //~~fn link
 // Creates a symbolic link at link pointing to target. Returns 0 on success, or
 // an errno on failure.
-fn link*(target: str, link: str): std.Err {
+fn link*(target: str, link: str): std::Err {
 //~~
 	return errFromErrno(umc__link(target, link))
 }
@@ -109,7 +109,7 @@ fn umc__listdir(path: str, arr: ^[]str, strArrType: ^void): int
 //~~fn listdir
 // Returns a list of files in the given directory, second argument is 0 on
 // success or an errno on failure.
-fn listdir*(path: str): ([]str, std.Err) {
+fn listdir*(path: str): ([]str, std::Err) {
 //~~
 	var files: []str
 	err := umc__listdir(path, &files, typeptr([]str))
@@ -126,7 +126,7 @@ type WalkArgs* = struct {
 
 //~~fn walk
 // Walks the given directory, calling the given callback for each file.
-fn walk*(dir: str, cb: fn(file: str), args: WalkArgs = {}): std.Err {
+fn walk*(dir: str, cb: fn(file: str), args: WalkArgs = {}): std::Err {
 //~~
 	files, err := listdir(dir)
 	if err.code != 0 {
@@ -138,7 +138,7 @@ fn walk*(dir: str, cb: fn(file: str), args: WalkArgs = {}): std.Err {
 			continue
 		}
 
-		fullpath := filepath.join(dir, f)
+		fullpath := filepath::join(dir, f)
 
 		if isdir(fullpath) {
 			if !(args.skipLinks && islink(fullpath)) {
@@ -164,7 +164,7 @@ fn umc__chmod(path: str, mode: int): int
 //~~fn chmod
 // Changes the permissions of the given file. Returns 0 on success, or an
 // errno on failure.
-fn chmod*(path: str, mode: int): std.Err {
+fn chmod*(path: str, mode: int): std::Err {
 //~~
 	return errFromErrno(umc__chmod(path, mode))
 }
@@ -192,7 +192,7 @@ fn umc__getcwd(out: ^str): Errno
 
 //~~fn getCwd
 // Returns the current working directory.
-fn getCwd*(): (str, std.Err) {
+fn getCwd*(): (str, std::Err) {
 //~~
 	var out: str
 	errno := umc__getcwd(&out)
@@ -204,7 +204,7 @@ fn umc__setenv(key: str, value: str): int
 //~~fn setEnv
 // Sets the given environment variable to the given value. Returns 0 on
 // success, or an errno on failure.
-fn setEnv*(key: str, value: str): std.Err {
+fn setEnv*(key: str, value: str): std::Err {
 //~~
 	return errFromErrno(umc__setenv(key, value))
 }
@@ -225,7 +225,7 @@ fn umc__stat(path: str, buf: ^StatBuf): Errno
 
 //~~fn stat
 // Get information about a file.
-fn stat*(path: str): (StatBuf, std.Err) {
+fn stat*(path: str): (StatBuf, std::Err) {
 //~~
 	sb := StatBuf{}
 	err := umc__stat(path, &sb)
@@ -235,7 +235,7 @@ fn stat*(path: str): (StatBuf, std.Err) {
 fn main() {
 	printf("Platform: %d\n", getPlatform())
 	if cwd, err := getCwd(); err.code != 0 {
-		std.exitif(err)
+		std::exitif(err)
 	} else {
 		printf("Cwd: %s\n", cwd)
 	}
