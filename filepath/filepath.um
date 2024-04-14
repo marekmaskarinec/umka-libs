@@ -20,7 +20,7 @@ var os*: int // current os
 fn init() {
 //~~
 	os = windows
-	if std.getenv("HOME") != "" {
+	if std::getenv("HOME") != "" {
 		os = unix
 	}
 
@@ -40,11 +40,11 @@ fn dir*(inp: str): str {
 		init()
 	}
 
-	sp := strings.split(inp, "/", str(fileseparator))
+	sp := strings::split(inp, "/", str(fileseparator))
 	if len(sp) < 2 {
 		return ""
 	}
-	return strings.join(slice(sp, 0, len(sp)-1), str(fileseparator))
+	return strings::join(slice(sp, 0, len(sp)-1), str(fileseparator))
 }
 
 //~~fn file
@@ -55,7 +55,7 @@ fn file*(inp: str): str {
 		init()
 	}
 
-	sp := strings.split(inp, "/", str(fileseparator))
+	sp := strings::split(inp, "/", str(fileseparator))
 	if len(sp) < 2 {
 		return inp
 	}
@@ -70,7 +70,7 @@ fn ext*(inp: str): str {
 		init()
 	}
 	
-	sp := strings.split(inp, ".")
+	sp := strings::split(inp, ".")
 	return sp[len(sp) - 1]
 }
 
@@ -82,7 +82,7 @@ fn fromslash*(inp: str): str {
 		init()
 	}
 
-	return strings.replace(inp, "/", str(fileseparator))
+	return strings::replace(inp, "/", str(fileseparator))
 }
 
 //~~fn toslash
@@ -93,7 +93,7 @@ fn toslash*(inp: str) : str {
 		init()
 	}
 
-	return strings.replace(inp, str(fileseparator), "/")
+	return strings::replace(inp, str(fileseparator), "/")
 }
 
 //~~fn join
@@ -106,7 +106,7 @@ fn join*(inp: ..str): str {
 
 	o := ""
 	for i,s in inp {
-		o += strings.trimprefix(s, str(fileseparator))
+		o += strings::trimprefix(s, str(fileseparator))
 		if i < len(inp) - 1 && o[len(o) -1] != fileseparator {
 			o += str(fileseparator)
 		}
@@ -123,7 +123,7 @@ fn split*(path: str): []str {
 		init()
 	}
 
-	return strings.split(path, "/", str(fileseparator))
+	return strings::split(path, "/", str(fileseparator))
 }
 
 fn main() {
