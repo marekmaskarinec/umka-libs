@@ -55,7 +55,7 @@ fn (this: ^ConsoleBackend) write*(s: str) {
 type FileBackend* = struct {
 	// Contains private fields
 //~~
-	f: std.File
+	f: std::File
 }
 
 fn (this: ^FileBackend) write*(s: str) {
@@ -66,14 +66,14 @@ fn (this: ^FileBackend) write*(s: str) {
 // Closes the internal file.
 fn (this: ^FileBackend) close*() {
 //~~
-	std.fclose(this.f)
+	std::fclose(this.f)
 }
 
 //~~fn mkFileBackend
 // Creates a `FileBackend`. If `rewrite` is false, the file will be appended.
-fn mkFileBackend*(path: str, rewrite: bool = false): (FileBackend, std.Err) {
+fn mkFileBackend*(path: str, rewrite: bool = false): (FileBackend, std::Err) {
 //~~
-	f, err := std.fopen(path, rewrite ? "w" : "a")
+	f, err := std::fopen(path, rewrite ? "w" : "a")
 	return { f }, err
 }
 
@@ -159,7 +159,7 @@ fn getLogLevel(tag: str): LogLevel {
 }
 
 fn logRaw(levelStr: str, tag: str, fmtStr: str, args: []any) {
-	dt := std.localtime(std.time())
+	dt := std::localtime(std::time())
 
 	conf.backend.write(sprintf("[%s]: %04d-%02d-%02dT%02d:%02d:%02d: %s: %s\n",
 		levelStr, dt.year, dt.month, dt.day, dt.hour, dt.minute, dt.second, tag,
@@ -232,7 +232,7 @@ fn main() {
 	err(TAG, "Error log")
 
 	fb, e := mkFileBackend("log.txt", true)
-	std.exitif(e)
+	std::exitif(e)
 	setBackend(fb)
 	dbg("debug.um", "Debug log")
 	dbg(TAG, "Debug log")
