@@ -24,8 +24,8 @@ fn strerror(err: Errno): str {
 	return umc__tar_strerror(err)
 }
 
-fn errFromErrno(e: Errno): std.Err {
-	return std.error(int(e), strerror(e), "tar.um")
+fn errFromErrno(e: Errno): std::Err {
+	return std::error(int(e), strerror(e), "tar.um")
 }
 
 //~~struct File
@@ -50,7 +50,7 @@ fn umc__tar_open(path: str, mode: str, out: ^Tar): Errno
 														
 //~~fn open
 // Opens a tar archive at the given path with the given mode.
-fn open*(path: str, mode: str): (Tar, std.Err) {
+fn open*(path: str, mode: str): (Tar, std::Err) {
 //~~
 	var t: Tar
 	err := umc__tar_open(path, mode, &t)
@@ -61,7 +61,7 @@ fn umc__tar_open_bytes(dat: ^[]uint8, out: ^Tar): Errno
 
 //~~fn openBytes
 // Opens a tar archive from the given byte array (read only).
-fn openBytes*(dat: []uint8): (Tar, std.Err) {
+fn openBytes*(dat: []uint8): (Tar, std::Err) {
 //~~
 	var t: Tar
 	err := umc__tar_open_bytes(&dat, &t)
@@ -72,7 +72,7 @@ fn umc__tar_close(tar: ^struct{}): Errno
 
 //~~fn close
 // Closes the given tar archive.
-fn (t: ^Tar) close*(): std.Err {
+fn (t: ^Tar) close*(): std::Err {
 //~~
 	err := umc__tar_close(t._)
 		return errFromErrno(err)
@@ -82,7 +82,7 @@ fn umc__tar_get_files(tar: ^struct{}, out: ^[]File, fileArrType: ^void): Errno
 													  
 //~~fn getFiles
 // Returns a list of files in the given tar archive.
-fn (t: ^Tar) getFiles*(): ([]File, std.Err) {
+fn (t: ^Tar) getFiles*(): ([]File, std::Err) {
 //~~
 	var files: []File
 	err := umc__tar_get_files(t._, &files, typeptr([]File))
@@ -93,7 +93,7 @@ fn umc__tar_read(tar: ^struct{}, path: str, out: ^[]char, bytesArrType: ^void): 
 
 //~~fn readBin
 // Reads the given file from the tar archive as a byte array.
-fn (t: ^Tar) read*(path: str): ([]char, std.Err) {
+fn (t: ^Tar) read*(path: str): ([]char, std::Err) {
 //~~
 	var s: []char
 	err := umc__tar_read(t._, path, &s, typeptr([]char))
@@ -102,36 +102,36 @@ fn (t: ^Tar) read*(path: str): ([]char, std.Err) {
 
 //~~fn extract
 // Extracts the given tar archive to the given directory.
-fn (t: ^Tar) extract*(dir: str): std.Err {
+fn (t: ^Tar) extract*(dir: str): std::Err {
 //~~
 	files, err := t.getFiles()
 	if (err.code != 0) {
 		return err
 	}
 		
-	os.mkdirp(dir)
+	os::mkdirp(dir)
 
 	for i:=0; i < len(files); i++ {
-		path := filepath.join(dir, files[i].name)
-		os.mkdirp(filepath.dir(path))
+		path := filepath::join(dir, files[i].name)
+		os::mkdirp(filepath::dir(path))
 
 		dat, err := t.read(files[i].name)
 		if (err.code != 0) {
 			return err
 		}
 
-		if filepath.file(path) == "@PaxHeader" {
+		if filepath::file(path) == "@PaxHeader" {
 		   continue
 		}
 
-		f, err := std.fopen(path, "wb")
+		f, err := std::fopen(path, "wb")
 		if err.code != 0 {
 			return err
 		}
-		std.fwrite(f, dat)
-		std.fclose(f)
+		std::fwrite(f, dat)
+		std::fclose(f)
 		
-		os.chmod(path, files[i].mode)
+		os::chmod(path, files[i].mode)
 	}
 	
 	return {}
@@ -151,35 +151,35 @@ fn umc__tar_finalize(t: ^struct{}): Errno
 
 //~~fn finalize
 // Finalizes the tar archive.
-fn (t: ^Tar) finalize*(): std.Err {
+fn (t: ^Tar) finalize*(): std::Err {
 //~~
 	err :=  umc__tar_finalize(t._)
 	return errFromErrno(err)
 }
 
 fn main() {
-	var err: std.Err
+	var err: std::Err
 	var tar: Tar
 		
 	tar, err = open("test.tar", "w")
-	std.exitif(err)
+	std::exitif(err)
 	
 	tar.addFile("box.json")
 	tar.addFile("microtar/README.md")
 	tar.addFile("tar_linux.umi")
 	
 	err = tar.finalize()
-	std.exitif(err)
+	std::exitif(err)
 	
 	err = tar.close()
-	std.exitif(err)
+	std::exitif(err)
 	
 	tar, err = open("test.tar", "r")
-	std.exitif(err)
+	std::exitif(err)
 	
 	var files: []File
 	files, err = tar.getFiles()
-	std.exitif(err)
+	std::exitif(err)
 	
 	printf("Files in tar file:\n")
 	for i in files {
@@ -189,12 +189,12 @@ fn main() {
 	printf("Reading box.json:\n")
 	var umboxJson: []char
 	umboxJson, err = tar.read("box.json")
-	std.exitif(err)
+	std::exitif(err)
 	printf("%s\n", str(umboxJson))
 		
 	err = tar.extract("extracted")
-	std.exitif(err)
+	std::exitif(err)
 	
 	err = tar.close()
-	std.exitif(err)
+	std::exitif(err)
 }
