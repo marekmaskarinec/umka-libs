@@ -149,9 +149,9 @@ fn (l: ^lexer) parse_val(t: token): any {
 	case tok_str:
 		return t.value
 	case tok_int:
-		return std.atoi(t.value)
+		return std::atoi(t.value)
 	case tok_real:
-		return std.atof(t.value)
+		return std::atof(t.value)
 	case tok_opener:
 		return l.parse_object()
 	case tok_lopener:
