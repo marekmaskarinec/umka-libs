@@ -4,20 +4,20 @@ import (
 )
 
 fn main() {
-    fname := std.argv(1)
-    aname := std.argv(2)
+    fname := std::argv(1)
+    aname := std::argv(2)
     
-    f := std.fopen(fname, "rb")
-    std.fseek(f, 0, std.seekEnd)
-    size := std.ftell(f)
-    std.fseek(f, 0, std.seekBegin)
+    f := std::fopen(fname, "rb").item0
+    std::fseek(f, 0, .end)
+    size := std::ftell(f).item0
+    std::fseek(f, 0, .begin)
 
     inp := make([]uint8, size)
-    std.fread(f, inp)
+    std::fread(f, inp)
     
-    std.fclose(f)
+    std::fclose(f)
 
-    f = std.fopen(fname+".h", "wb")
+    f = std::fopen(fname+".h", "wb").item0
 
     fprintf(f, "#ifndef %s_H_\n", aname)
     fprintf(f, "#define %s_H_\n", aname)
@@ -30,5 +30,5 @@ fn main() {
     fprintf(f, "\n};\n")
     fprintf(f, "#endif\n")
 
-    std.fclose(f)
+    std::fclose(f)
 }
