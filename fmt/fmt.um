@@ -4,7 +4,7 @@ import (
 
 //~~fn fmt
 // "{}" in the string `s` will be subtituted for the arguments
-fn fmt*(s: str, args: ..any): str {
+fn fmt*(s: str, args: ..any): (str, std::Err) {
 //~~
 	o := []char{}
 	a := 0
@@ -25,7 +25,7 @@ fn fmt*(s: str, args: ..any): str {
 		}
 
 		if a >= len(args) {
-			error("sfmt: not enough arguments")
+			return "", std.error(-1, "not enough arguments", "fmt.um")
 		}
 
 		o = append(o, []char(sprintf("%v", args[a])))
@@ -36,10 +36,10 @@ fn fmt*(s: str, args: ..any): str {
 	}
 
 	if a != len(args) {
-		error("sfmt: too many arguments")
+		return "", std.error(-1, "too many arguments", "fmt.um")
 	}
 
-	return o
+	return o, {}
 }
 
 type vec2 = struct {
@@ -47,8 +47,8 @@ type vec2 = struct {
 }
 
 fn main() {
-	printf("basic usage: %s\n", fmt("a number {}, a string {}", 32, "hello"))
-	printf("skip format tag: %s\n", fmt("skip me \\{}"))
-	printf("complex types: %s\n", fmt("what can this print? {} {}",
+	printf("basic usage: %v\n", fmt("a number {}, a string {}", 32, "hello"))
+	printf("skip format tag: %v\n", fmt("skip me \\{}"))
+	printf("complex types: %v\n", fmt("what can this print? {} {}",
 		vec2{2, 4}, []int{1, 2, 3, 4}))
 }
