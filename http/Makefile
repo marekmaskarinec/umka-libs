@@ -1,7 +1,7 @@
 
 CROSS_CC=x86_64-w64-mingw32-gcc
 NAME=http
-UMKA=./umbox/umka/linux/umka
+UMKA=./umbox/umka/umka
 CFLAGS= \
 	-Wall \
 	-Wno-unused-label \
@@ -32,7 +32,7 @@ libcurl-x64.dll curl-ca-bundle.crt:
 	
 curl-ca-bundle.crt.h: curl-ca-bundle.crt
 	@echo EM curl-ca-bundle.crt.h
-	@./umbox/umka/linux/umka embed.um curl-ca-bundle.crt ca_bundle
+	@./umbox/umka/umka embed.um curl-ca-bundle.crt ca_bundle
 
 %_windows.umi: %.c libcurl-x64.dll curl-ca-bundle.crt.h Makefile
 	@echo CC $@
