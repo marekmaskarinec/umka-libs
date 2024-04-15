@@ -87,7 +87,7 @@ fn (l: ^lexer) lex_space(): str {
 	out := ""
 	l.pos--
 	c := l.get()
-	for c != ' ' && c != '}' && c != ']' && c != '\n' && c != ',' && c != '\t' {
+	for c != ' ' && c != '}' && c != ']' && c != '\n' && c != '\r' && c != ',' && c != '\t' {
 		out += c
 		c = l.get()
 	}
