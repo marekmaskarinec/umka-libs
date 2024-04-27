@@ -4,8 +4,7 @@ import (
 )
 
 const (
-	tok_null = 0
-	tok_opener
+	tok_opener = 1
 	tok_closer
 	tok_colon
 	tok_str
@@ -238,7 +237,7 @@ fn parse*(inp: str): any {
 //~~
 	l := lexer{inp, len(inp), 0, 1, {}}
 
-	t, end := l.lex_next()
+	t := l.lex_next().item0
 	var out: any
 
 	switch (t.t) {
