@@ -89,6 +89,7 @@ umc__get(UmkaStackSlot *p, UmkaStackSlot *r)
 	curl_easy_setopt(curl, CURLOPT_FOLLOWLOCATION, 1L);
 	curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, writefn);
 	curl_easy_setopt(curl, CURLOPT_WRITEDATA, &b);
+	curl_easy_setopt(curl, CURLOPT_ACCEPT_ENCODING, "");
 
 #ifdef _WIN32
 	struct curl_blob blob = {0};
@@ -171,6 +172,7 @@ umc__post(UmkaStackSlot *p, UmkaStackSlot *r)
 	curl_easy_setopt(curl, CURLOPT_POSTFIELDSIZE, api->umkaGetDynArrayLen(body));
 	curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, writefn);
 	curl_easy_setopt(curl, CURLOPT_WRITEDATA, &b);
+	curl_easy_setopt(curl, CURLOPT_ACCEPT_ENCODING, "");
 
 #ifdef _WIN32
 	struct curl_blob blob = {0};
