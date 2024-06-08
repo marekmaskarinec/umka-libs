@@ -5,7 +5,8 @@
     "license": "Unlicense/MIT",
     "description": "String manipulation library",
     "readme": "README.md",
-    "link": "https://git.sr.ht/~mrms/stringsum",
+    "source": "https://git.sr.ht/~mrms/stringsum",
+    "homepage": "https://git.sr.ht/~mrms/stringsum",
     "dependencies": [],
     "include": [
         "strings.um"
