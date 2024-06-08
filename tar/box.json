@@ -5,7 +5,8 @@
     "license": "Unlicense/MIT",
     "description": "A tar library",
     "readme": "README.md",
-    "link": "https://git.sr.ht/~mrms/tarum",
+    "source": "https://git.sr.ht/~mrms/tarum",
+    "homepage": "https://git.sr.ht/~mrms/tarum",
     "dependencies": [
         "os",
         "filepath",
