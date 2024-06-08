@@ -5,7 +5,8 @@
     "license": "Unlicense/MIT",
     "description": "OS operation library",
     "readme": "README.md",
-    "link": "",
+		"source": "https://git.sr.ht/~mrms/osum",
+		"homepage": "https://git.sr.ht/~mrms/osum",
     "dependencies": [
         "umka_api",
         "filepath"
