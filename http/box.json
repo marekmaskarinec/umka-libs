@@ -5,7 +5,8 @@
     "license": "Unlicense/MIT",
     "description": "HTTP client library",
     "readme": "README.md",
-    "link": "https://git.sr.ht/~mrms/httpum",
+    "source": "https://git.sr.ht/~mrms/httpum",
+    "homepage": "https://git.sr.ht/~mrms/httpum",
     "dependencies": [
         "umka"
     ],
