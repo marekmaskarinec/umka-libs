@@ -5,7 +5,8 @@
     "license": "Unlicense/MIT",
     "description": "Filepath operation library",
     "readme": "README.md",
-    "link": "",
+    "source": "https://git.sr.ht/~mrms/filepathum",
+    "link": "https://git.sr.ht/~mrms/filepathum",
     "dependencies": [
         "strings"
     ],
