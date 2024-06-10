@@ -1,7 +1,6 @@
 # os.um
 
-An OS operation library for Umka. Download using
-[PAK](https://pak.tophat2d.dev/package/os).
+An OS operation library for Umka.
 
 ## Example
 
