@@ -55,24 +55,6 @@ fn (this: ^Encoder) getState(): State {
 	return this.state[len(this.state) - 1]
 }
 
-//~~fn Encoder.putKey
-fn (this: ^Encoder) putKey*(key: str) {
-//~~
-	this.newLine()
-	this.write(sprintf("\"%s\": ", key))
-}
-
-//~~fn Encoder.putVal
-fn (this: ^Encoder) putVal*(a: any) {
-//~~
-	if this.getState() == array {
-		this.newLine()
-	}
-
-	this.write(sprintf("%v", a))
-	this.putComma = true
-}
-
 //~~fn Encoder.startObject
 fn (this: ^Encoder) startObject*() {
 //~~
@@ -138,6 +120,43 @@ fn (this: ^Encoder) endArray*() {
 	this.state = slice(this.state, 0, len(this.state) - 1)
 }
 
+//~~fn Encoder.putKey
+fn (this: ^Encoder) putKey*(key: str) {
+//~~
+	this.newLine()
+	this.write(sprintf("\"%s\": ", key))
+}
+
+//~~fn Encoder.putVal
+fn (this: ^Encoder) putVal*(a: any) {
+//~~
+	if this.getState() == array {
+		this.newLine()
+	}
+
+	if ^map[str]any(a) != null {
+		this.startObject()
+			for k,v in map[str]any(a) {
+				this.putKey(k)
+				this.putVal(v)
+			}
+		this.endObject()
+		return
+	}
+
+	if ^[]any(a) != null {
+		this.startArray()
+			for v in []any(a) {
+				this.putVal(v)
+			}
+		this.endArray()
+		return
+	}
+
+	this.write(sprintf("%v", a))
+	this.putComma = true
+}
+
 //~~fn Encoder.toStr
 fn (this: ^Encoder) toStr*(): str {
 //~~
@@ -159,6 +178,10 @@ fn main() {
 			enc.putVal(1)
 			enc.putVal(false)
 			enc.putVal("hello I'm a string")
+			enc.putVal(map[str]any{
+				"a": 123,
+				"b": []any{ 1, 2, 3 }
+			})
 		enc.endArray()
 	enc.endObject()
 
