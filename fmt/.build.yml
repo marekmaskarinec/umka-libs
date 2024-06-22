@@ -4,7 +4,7 @@ packages:
 - mingw-w64
 - unzip
 secrets:
-- 1d3c187b-0f00-4efa-91df-b9523c3a2db5
+- ed722dc4-1829-4784-bcc1-381c880a854f
 sources:
 - https://git.sr.ht/~mrms/fmtum
 environment:
