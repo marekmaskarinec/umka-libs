@@ -4,6 +4,8 @@
     "author": "Marek Maškarinec <marek@mrms.cz>",
     "license": "Unlicense/MIT",
     "description": "Alternative formatting function",
+		"source": "https://git.sr.ht/~mrms/fmtum",
+		"homepage": "https://git.sr.ht/~mrms/fmtum",
     "readme": "README.md",
     "dependencies": [],
     "include": ["fmt.um"]
