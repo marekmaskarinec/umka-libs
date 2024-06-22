@@ -258,23 +258,33 @@ fn vsfmt*(s: str, args: []any): str {
 	return o
 }
 
+//~~fn sfmt
 fn sfmt*(s: str, args: ..any): str {
+//~~
 	return vsfmt(s, args)
 }
 
+//~~fn vffmt
 fn vffmt*(f: std::File, s: str, args: []any) {
+//~~
 	fprintf(f, "%s", vsfmt(s, args))
 }
 
+//~~fn ffmt
 fn ffmt*(f: std::File, s: str, args: ..any) {
+//~~
 	vffmt(f, s, args)
 }
 
+//~~fn vfmt
 fn vfmt*(s: str, args: []any) {
+//~~
 	vffmt(std::stdout(), s, args)
 }
 
+//~~fn fmt
 fn fmt*(s: str, args: ..any) {
+//~~
 	vfmt(s, args)
 }
 
