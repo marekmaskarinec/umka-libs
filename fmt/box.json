@@ -1,6 +1,6 @@
 {
     "name": "fmt",
-    "version": "v0.1.0",
+    "version": "v1.0.0",
     "author": "Marek Maškarinec <marek@mrms.cz>",
     "license": "Unlicense/MIT",
     "description": "Alternative formatting function",
