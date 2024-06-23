@@ -1,11 +1,12 @@
 {
     "name": "logs",
-    "version": "v0.1.0",
+    "version": "v1.1.0",
     "author": "Marek Maškarinec <marek@mrms.cz>",
     "license": "Unlicense/MIT",
     "description": "Logging library",
     "readme": "README.md",
-    "link": "",
-    "dependencies": [],
+		"homepage": "https://git.sr.ht/~mrms/logsum",
+		"source": "https://git.sr.ht/~mrms/logsum",
+    "dependencies": ["fmt"],
     "include": ["logs.um"]
 }

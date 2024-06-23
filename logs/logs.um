@@ -1,6 +1,7 @@
 
 import (
 	"std.um"
+	"umbox/fmt/fmt.um"
 )
 
 //~~
@@ -113,43 +114,6 @@ fn setTagLogLevel*(tag: str, level: LogLevel) {
 	conf.tagLevel[tag] = level
 }
 
-fn fmt(s: str, args: []any): str {
-	o := []char{}
-	a := 0
-
-	l := len(s)
-	for i:=0; i < l; i++ {
-		// handle \{
-		if s[i] == '\\' && i < l-1 && s[i+1] == '{' {
-			o = append(o, '{')
-			i++
-			continue
-		}
-
-		// if normal character, just add it to the output
-		if s[i] != '{' {
-			o = append(o, s[i])
-			continue
-		}
-
-		if a >= len(args) {
-			exit(1, "sfmt: not enough arguments")
-		}
-
-		o = append(o, []char(sprintf("%v", args[a])))
-		a++
-
-		// skip the }
-		i++
-	}
-
-	if a != len(args) {
-		exit(1, "sfmt: too many arguments")
-	}
-
-	return o
-}
-
 fn getLogLevel(tag: str): LogLevel {
 	if validkey(conf.tagLevel, tag) {
 		return conf.tagLevel[tag]
@@ -163,7 +127,7 @@ fn logRaw(levelStr: str, tag: str, fmtStr: str, args: []any) {
 
 	conf.backend.write(sprintf("[%s]: %04d-%02d-%02dT%02d:%02d:%02d: %s: %s\n",
 		levelStr, dt.year, dt.month, dt.day, dt.hour, dt.minute, dt.second, tag,
-		fmt(fmtStr, args))
+		fmt::vsfmt(fmtStr, args))
 	)
 }
 
