@@ -232,8 +232,24 @@ fn stat*(path: str): (StatBuf, std::Err) {
 	return sb, errFromErrno(err)
 }
 
+fn umc__chdir(path: str): Errno
+
+//~~fn chdir
+// Changes the current directory of the process. Returns 0 on success or an errno on failure.
+fn chdir*(path: str): std::Err {
+	return errFromErrno(umc__chdir(path))
+}
+//~~
+
 fn main() {
-	printf("Platform: %d\n", getPlatform())
+	plat := "unknown"
+	switch getPlatform() {
+		case .posix: plat = "POSIX"
+		case .windows: plat = "Windows"
+		case .emscripten: plat = "Emscripten"
+	}
+	printf("Platform: %s\n", plat)
+
 	if cwd, err := getCwd(); err.code != 0 {
 		std::exitif(err)
 	} else {
@@ -268,4 +284,15 @@ fn main() {
 		printf("Error: %s (code %d) in %v\n", err.msg, err.code, err.sender)
 	}
 	chmod("test", 0744)
+
+	mkdir("newcwd")
+	std::exitif(chdir("newcwd"))
+
+	if cwd, err := getCwd(); err.code != 0 {
+		std::exitif(err)
+	} else {
+		printf("Cwd: %s\n", cwd)
+		chdir("..")
+		remove("newcwd")
+	}
 }

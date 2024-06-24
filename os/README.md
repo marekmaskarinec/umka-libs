@@ -6,7 +6,7 @@ An OS operation library for Umka.
 
 ```
 import (
-        "pak/os/os.um"
+        "umbox/os/os.um"
 )
 
 fn main() {

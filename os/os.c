@@ -324,3 +324,18 @@ umc__stat(UmkaStackSlot *p, UmkaStackSlot *r)
 
 	r->intVal = 0;
 }
+
+// fn umc__chdir(path: str): Errno
+void
+umc__chdir(UmkaStackSlot *p, UmkaStackSlot *r)
+{
+	char *path = p[0].ptrVal;
+
+#ifdef _WIN32
+	r->intVal = 0;
+	if (!SetCurrentDirectory(path))
+		r->intVal = GetLastError();
+#else
+	r->intVal = chdir(path) ? errno : 0;
+#endif
+}
