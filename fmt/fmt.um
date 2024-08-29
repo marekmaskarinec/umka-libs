@@ -57,7 +57,7 @@ fn formatVal(v: any, m: Mod): str {
 			s = sprintf("%x", int(i))
 		case uint8:
 			s = sprintf("%x", i)
-		case uint16:
+		case int8:
 			s = sprintf("%x", i)
 		case uint16:
 			s = sprintf("%x", i)
@@ -78,7 +78,7 @@ fn formatVal(v: any, m: Mod): str {
 			s = sprintf("%X", int(i))
 		case uint8:
 			s = sprintf("%X", i)
-		case uint16:
+		case int8:
 			s = sprintf("%X", i)
 		case uint16:
 			s = sprintf("%X", i)
