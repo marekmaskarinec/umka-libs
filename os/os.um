@@ -237,9 +237,9 @@ fn umc__chdir(path: str): Errno
 //~~fn chdir
 // Changes the current directory of the process. Returns 0 on success or an errno on failure.
 fn chdir*(path: str): std::Err {
+//~~
 	return errFromErrno(umc__chdir(path))
 }
-//~~
 
 fn main() {
 	plat := "unknown"
