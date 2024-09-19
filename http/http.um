@@ -1,104 +1,159 @@
 
 import (
-    "std.um"
+	"std.um"
+	"umbox/strings/strings.um"
 )
 
+//~~struct Progress
+type Progress* = struct {
+	// total data to download
+	dltotal: int
+	// amount of downloaded data
+	dlnow: int
+	// total data to upload
+	ultotal: int
+	// amount of uploaded data
+	ulnow: int
+}
+//~~
+
 //~~struct Response
-// Http response struct.
 type Response* = struct {
-    ok: bool         // true if the request was successful
-    err: str         // error message if the request failed
-    status: int      // HTTP status code
-    contentType: str // response content type
-		body: []char     // body of the response
+	status: int
+	headers: map[str]str
+	body: []char
+	complete: bool
+	progress: Progress
 }
 //~~
 
-//~~struct GetParams
-// Optional parameters for the `get` function.
-type GetParams* = struct {
-    userAgent: str
-    headers: []str
+type cResponse* = struct {
+	status: int
+	headers: str
+	body: []char
+	progress: Progress
+}
+
+//~~enum Method
+type Method* = enum {
+	get
+	post
 }
 //~~
 
-fn umc__get(url: str, params: ^GetParams, resp: ^Response, typeof: ^void)
-
-//~~fn get
-// Make a GET request.
-fn get*(url: str, params: GetParams = {}): Response {
-//~~
-    resp := Response{}
-    umc__get(url, &params, &resp, typeptr([]char))
-    return resp
-}
-
-//~~fn encodeUrl
-// Encode a URL with query parameters.
-fn encodeUrl*(url: str, args: map[str]any): str {
-//~~
-    url += "?"
-    for k,v in args {
-        s := sprintf("%v", v)
-        if ^str(v) != null {
-            s = str(v)
-        }
-        url += str(k) + "=" + s + "&"
-    }
-    
-    return slice(url, 0, len(url)-1) // remove last &
-}
-
-//~~struct PostParams
-// Optional parameters for the `post` function.
-type PostParams* = struct {
-    userAgent: str
-    headers: []str
+//~~struct Request
+type Request* = struct {
+	method: Method
+	url: str
+	headers: map[str]str
+	body: []char
 }
 //~~
 
-fn umc__post(url: str, body: ^[]char, params: ^PostParams, out: ^Response, typeof: ^void)
-    
-//~~fn post
-// Make a POST request.
-fn post*(url: str, body: []char, params: PostParams = {}): Response {
-//~~
-    resp := Response{}
-    umc__post(url, &body, &params, &resp, typeptr([]char))
-    return resp
+type cRequest* = struct {
+	method: Method
+	url: str
+	headers: []str
+	body: []char
 }
 
-//~~Example
+type RequestHandle* = struct{ _: ^struct{} }
+
+fn umc__request(cr: ^cRequest): ^struct{}
+fn umc__poll(rh: ^struct{}, cresp: ^cResponse, typeptr: ^void): int
+fn umc__strerror(code: int): str
+
+fn errFromCode(code: int): std::Err {
+	return std::error(code, umc__strerror(code), "http.um")
+}
+
+fn requestAsync*(r: Request): RequestHandle {
+	cr := cRequest {
+		method: r.method,
+		url: r.url,
+		headers: {},
+		body: r.body
+	}
+
+	for k,v in r.headers {
+		cr.headers = append(cr.headers, sprintf("%s: %s", k, v))
+	}
+
+	return { umc__request(&cr) }
+}
+
+fn (rh: ^RequestHandle) poll*(): (Response, std::Err) {
+	cresp := cResponse{}
+	err := umc__poll(rh._, &cresp, typeptr([]char))
+	if err != 0 {
+		return { progress: cresp.progress }, errFromCode(err)
+	}
+
+	headersList := strings::split(cresp.headers, "\n")
+	headers := map[str]str{}
+
+	for i,h in headersList {
+		sp := strings::split(h, ": ")
+		if len(sp) != 2 { continue }
+		headers[sp[0]] = sp[1]
+	}
+
+	return {
+		status: cresp.status,
+		body: cresp.body,
+		headers: headers,
+		complete: true,
+		progress: cresp.progress
+	}, {}
+}
+
+fn request*(r: Request): (Response, std::Err) {
+	rh := requestAsync(r)
+	for true {
+		if resp, err := rh.poll(); resp.complete {
+			return resp, err
+		}
+	}
+
+	return {}, {}
+}
+
+//~~Examplenm -D
 fn main() {
-    resp := get(
-        encodeUrl("https://httpbin.org/get", {
-            "foo": "bar",
-            "baz": 42
-        }),
-        {
-            userAgent: "my user agent"
-        }
-    )
+	rh := requestAsync({
+		url: "https://httpbin.org/get"
+	})
 
-    printf("Ok: %v\n", resp.ok)
-    printf("Error: %v\n", resp.err)
-    printf("Code: %v\n", resp.status)
-    printf("Content type: %v\n", resp.contentType)
-    printf("Body: %v\n", str(resp.body))
+	for true {
+		if resp, err := rh.poll(); resp.complete {
+			std::exitif(err)
+			printf("status: %d\n", resp.status)
+			for k, v in resp.headers {
+				printf("%s: %s\n", k, v)
+			}
+			printf("body: %v\n", str(resp.body))
+			break
+		} else {
+			if resp.progress.dltotal > 0 {
+				printf("Progress: %.1f%% (%d/%d)\n", real(resp.progress.dlnow) / resp.progress.dltotal * 100, resp.progress.dlnow, resp.progress.dltotal)
+			} else {
+				printf("Progress: unknown\n")
+			}
+			for i:=0; i < 1999999; i++ {}
+		}
+	}
 
-    resp = post(
-        "https://httpbin.org/post",
-				[]char("Hello world"),
-        {
-            userAgent: "my user agent",
-            headers: { "Content-Type: text/plain" }
-        }
-    ) 
-
-    printf("Ok: %v\n", resp.ok)
-    printf("Error: %v\n", resp.err)
-    printf("Code: %v\n", resp.status)
-    printf("Content type: %v\n", resp.contentType)
-    printf("Body: %v\n", str(resp.body))
+	resp, err := request({
+		method: .post,
+		url: "https://httpbin.org/post",
+		headers: { "Content-Type": "application/json" },
+		body: []char("[ 1, 2, 3 ]")
+	})
+	std::exitif(err)
+	printf("status: %d\n", resp.status)
+	for k, v in resp.headers {
+		printf("%s: %s\n", k, v)
+	}
+	printf("body: %v\n", str(resp.body))
 }
 //~~
