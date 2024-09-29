@@ -339,3 +339,16 @@ umc__chdir(UmkaStackSlot *p, UmkaStackSlot *r)
 	r->intVal = chdir(path) ? errno : 0;
 #endif
 }
+
+// fn umc__sleep(ms: int)
+void
+umc__sleep(UmkaStackSlot *p, UmkaStackSlot *r)
+{
+	int ms = p[0].intVal;
+
+#ifdef _WIN32
+	Sleep(ms);
+#else
+	usleep(ms * 1000);
+#endif
+}
