@@ -67,7 +67,11 @@ fn errFromCode(code: int): std::Err {
 	return std::error(code, umc__strerror(code), "http.um")
 }
 
+//~~fn requestAsync
+// Make an asynchronous request and return a RequestHandle. The handle can be
+// polled for the response.
 fn requestAsync*(r: Request): RequestHandle {
+//~~
 	cr := cRequest {
 		method: r.method,
 		url: r.url,
@@ -82,7 +86,12 @@ fn requestAsync*(r: Request): RequestHandle {
 	return { umc__request(&cr) }
 }
 
+//~~fn RequestHandle.poll
+// Poll the handle for a response or an error. If the request is ongoing, the
+// response has `completed` set to `false`. The `progress` field can be used to
+// see progress of the request.
 fn (rh: ^RequestHandle) poll*(): (Response, std::Err) {
+//~~
 	cresp := cResponse{}
 	err := umc__poll(rh._, &cresp, typeptr([]char))
 	if err != 0 {
@@ -107,7 +116,10 @@ fn (rh: ^RequestHandle) poll*(): (Response, std::Err) {
 	}, {}
 }
 
+//~~fn request
+// Make a request and return the response.
 fn request*(r: Request): (Response, std::Err) {
+//~~
 	rh := requestAsync(r)
 	for true {
 		if resp, err := rh.poll(); resp.complete {
@@ -118,7 +130,7 @@ fn request*(r: Request): (Response, std::Err) {
 	return {}, {}
 }
 
-//~~Examplenm -D
+//~~Example
 fn main() {
 	rh := requestAsync({
 		url: "https://httpbin.org/get"
