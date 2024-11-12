@@ -9,6 +9,8 @@
     "homepage": "https://git.sr.ht/~mrms/csvum",
     "dependencies": [],
     "include": ["csv.um"],
-    "run_posix": "./pak/umka/linux/umka csv.um",
-    "run_windows": ".\\pak\\umka\\windows\\umka.exe csv.um"
+		"run": {
+			"posix": "csv.um",
+			"windows": "csv.um"
+		}
 }
