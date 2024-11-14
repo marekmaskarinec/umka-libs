@@ -18,6 +18,8 @@
         "tar_linux.umi"
     ],
     "pre_build": "make",
-    "run_posix": "make run",
-    "run_windows": "./pak/umka/umka.exe tar.um"
+		"run": {
+			"posix": "make run",
+			"windows": "./umbox/umka/umka.exe tar.um"
+		}
 }
