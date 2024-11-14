@@ -13,6 +13,5 @@
     "include": [
         "filepath.um"
     ],
-    "run_posix": "umka filepath.um",
-    "run_windows": "umka.exe filepath.um"
+		"run": "umka filepath.um"
 }
