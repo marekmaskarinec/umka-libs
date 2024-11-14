@@ -18,7 +18,6 @@
 	],
 	"source": "https://git.sr.ht/~mrms/httpum",
 	"homepage": "https://git.sr.ht/~mrms/httpum",
-	"run_posix": "make run",
-	"run_windows": "make run",
+	"run": "make run",
 	"pre_build": "make build"
 }
