@@ -106,8 +106,13 @@ fn join*(inp: ..str): str {
 
 	o := ""
 	for i,s in inp {
-		o += strings::trimprefix(s, str(fileseparator))
-		if i < len(inp) - 1 && o[len(o) -1] != fileseparator {
+		if i != 0 {
+			o += strings::trimprefix(s, str(fileseparator))
+		} else {
+			o += s
+		}
+
+		if len(o) > 0 && i < len(inp) - 1 && o[len(o) -1] != fileseparator {
 			o += str(fileseparator)
 		}
 	}
