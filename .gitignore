@@ -1,0 +1,6 @@
+**/umbox/
+*.umi
+box.tar
+.cache/
+.vscode/
+compile_commands.json

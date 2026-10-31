@@ -20,15 +20,17 @@ all: build
 	@echo CC $@
 	@$(CC) $(CFLAGS) -shared -o $@ $< $(LDFLAGS)
 	
-libcurl-x64.dll curl-ca-bundle.crt:
+libcurl-x64.dll:
 	@echo Downloading libcurl-x64.dll
-	@curl https://curl.se/windows/dl-8.4.0_6/curl-8.4.0_6-win64-mingw.zip -O
-	@unzip curl-8.4.0_6-win64-mingw.zip
-	@cp curl-8.4.0_6-win64-mingw/bin/libcurl-x64.dll libcurl-x64.dll
-	@cp curl-8.4.0_6-win64-mingw/bin/libcurl-x64.def libcurl-x64.def
-	@cp curl-8.4.0_6-win64-mingw/bin/curl-ca-bundle.crt curl-ca-bundle.crt
-	@cp -r curl-8.4.0_6-win64-mingw/include/curl/ .
-	@rm -r curl-8.4.0_6-win64-mingw curl-8.4.0_6-win64-mingw.zip
+	@curl -fsSL "https://curl.se/windows/latest.cgi?p=win64-mingw.zip" -o curl-win64.zip
+	@rm -rf curl-win64 && unzip -q curl-win64.zip -d curl-win64
+	@cp curl-win64/*/bin/libcurl-x64.dll curl-win64/*/bin/libcurl-x64.def .
+	@cp -r curl-win64/*/include/curl/ .
+	@rm -r curl-win64 curl-win64.zip
+
+curl-ca-bundle.crt:
+	@echo Downloading curl-ca-bundle.crt
+	@curl -fsSL https://curl.se/ca/cacert.pem -o curl-ca-bundle.crt
 	
 curl-ca-bundle.crt.h: curl-ca-bundle.crt
 	@echo EM curl-ca-bundle.crt.h

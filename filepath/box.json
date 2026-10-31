@@ -5,8 +5,8 @@
     "license": "Unlicense/MIT",
     "description": "Filepath operation library",
     "readme": "README.md",
-    "source": "https://git.sr.ht/~mrms/filepathum",
-    "link": "https://git.sr.ht/~mrms/filepathum",
+    "source": "https://github.com/marekmaskarinec/umka-libs/tree/main/filepath",
+    "homepage": "https://github.com/marekmaskarinec/umka-libs/tree/main/filepath",
     "dependencies": [
         "strings"
     ],

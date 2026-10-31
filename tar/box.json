@@ -5,8 +5,8 @@
     "license": "Unlicense/MIT",
     "description": "A tar library",
     "readme": "README.md",
-    "source": "https://git.sr.ht/~mrms/tarum",
-    "homepage": "https://git.sr.ht/~mrms/tarum",
+    "source": "https://github.com/marekmaskarinec/umka-libs/tree/main/tar",
+    "homepage": "https://github.com/marekmaskarinec/umka-libs/tree/main/tar",
     "dependencies": [
         "os",
         "filepath",

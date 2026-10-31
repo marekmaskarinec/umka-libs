@@ -5,8 +5,8 @@
     "license": "Unlicense/MIT",
     "description": "Logging library",
     "readme": "README.md",
-		"homepage": "https://git.sr.ht/~mrms/logsum",
-		"source": "https://git.sr.ht/~mrms/logsum",
+		"homepage": "https://github.com/marekmaskarinec/umka-libs/tree/main/logs",
+		"source": "https://github.com/marekmaskarinec/umka-libs/tree/main/logs",
     "dependencies": ["fmt"],
     "include": ["logs.um"]
 }

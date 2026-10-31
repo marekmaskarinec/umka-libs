@@ -5,8 +5,8 @@
     "license": "Unlicense/MIT",
     "description": "String manipulation library",
     "readme": "README.md",
-    "source": "https://git.sr.ht/~mrms/stringsum",
-    "homepage": "https://git.sr.ht/~mrms/stringsum",
+    "source": "https://github.com/marekmaskarinec/umka-libs/tree/main/strings",
+    "homepage": "https://github.com/marekmaskarinec/umka-libs/tree/main/strings",
     "dependencies": [],
     "include": [
         "strings.um"

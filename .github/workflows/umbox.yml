@@ -1,0 +1,60 @@
+name: UmBox upload
+
+on:
+  push:
+    branches: [ main ]
+  workflow_dispatch:
+    inputs:
+      packages:
+        description: "Space-separated package names, or 'all'"
+        required: false
+        default: all
+
+jobs:
+  changes:
+    runs-on: ubuntu-latest
+    outputs:
+      packages: ${{ steps.pkgs.outputs.packages }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - id: pkgs
+        env:
+          EVENT: ${{ github.event_name }}
+          INPUT: ${{ inputs.packages }}
+          BEFORE: ${{ github.event.before }}
+          AFTER: ${{ github.sha }}
+        run: |
+          ALL="csv filepath fmt http json jsonenc logs os strings tar"
+          if [ "$EVENT" = workflow_dispatch ]; then
+            CANDIDATES="$INPUT"
+            [ "$CANDIDATES" = all ] && CANDIDATES="$ALL"
+          elif [ -z "$BEFORE" ] || ! git cat-file -e "$BEFORE^{commit}" 2>/dev/null; then
+            # First push (before = 000...) or unknown base: publish everything.
+            CANDIDATES="$ALL"
+          else
+            CANDIDATES=$(git diff --name-only "$BEFORE" "$AFTER" | cut -d/ -f1 | sort -u)
+          fi
+          # Keep only known package names.
+          P=$(tr ' ' '\n' <<<"$CANDIDATES" | grep -xF -f <(tr ' ' '\n' <<<"$ALL") || true)
+          echo "Packages to upload: ${P:-none}"
+          echo "packages=$(jq -cn --arg p "$P" '[$p | splits("\\s+") | select(length > 0)]')" >> "$GITHUB_OUTPUT"
+
+  upload:
+    needs: changes
+    if: needs.changes.outputs.packages != '[]'
+    runs-on: ubuntu-22.04
+    strategy:
+      fail-fast: false
+      matrix:
+        package: ${{ fromJson(needs.changes.outputs.packages) }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: true
+      - run: sudo apt-get update && sudo apt-get install -y mingw-w64 libcurl4-openssl-dev
+      - uses: marekmaskarinec/umbox@master
+        with:
+          dir: ${{ matrix.package }}
+          secret: ${{ secrets[format('UMBOX_{0}', matrix.package)] }}

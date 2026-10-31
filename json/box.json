@@ -5,8 +5,8 @@
     "license": "Unlicense/MIT",
     "description": "JSON decoder library",
     "readme": "README.md",
-    "source": "https://git.sr.ht/~mrms/jsonum",
-    "homepage": "https://git.sr.ht/~mrms/jsonum",
+    "source": "https://github.com/marekmaskarinec/umka-libs/tree/main/json",
+    "homepage": "https://github.com/marekmaskarinec/umka-libs/tree/main/json",
     "dependencies": [],
     "include": ["json.um"],
 		"run": "umka json.um"
