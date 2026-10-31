@@ -1,0 +1,92 @@
+//~~
+// A CSV parser, which also works for similar formats. It doesn't support
+// quotes, but you can escape characters using a backslash.
+//~~
+
+//~~fn parse
+// Parses input into a 2d string array.
+fn parse*(inp: str, sep: char = ','): [][]str {
+//~~
+	out := [][]str{}
+	row := []str{}
+	start := 0
+	acc := ""
+	l := len(inp)
+	skipnext := false
+
+	for i,c in inp {
+		if skipnext { skipnext = false; continue }
+
+		if c == '\\' {
+			acc += slice(inp, start, i)
+			start = i + 1
+			skipnext = true
+		} else if c == '\r' {
+			acc += slice(inp, start, i)
+			start = i + 1
+		} else if c == '\n' {
+			acc += slice(inp, start, i)
+			start = i + 1
+
+			row = append(row, acc)
+			out = append(out, row)
+
+			acc = ""
+			row = []str{}
+
+		} else if c == sep {
+			acc += slice(inp, start, i)
+			start = i + 1
+
+			row = append(row, acc)
+			acc = ""
+		}
+	}
+
+	if start < l {
+		row = append(row, acc + slice(inp, start, l))
+	}
+
+	if len(row) > 0 {
+		out = append(out, row)
+	}
+
+	return out
+}
+
+fn escapeStr(s: str, sep: char): str {
+	o := ""
+
+	for i,c in s {
+		if c == sep || c == '\n' || c == '\\' {
+			o += "\\"
+		}
+		o += str(c)
+	}
+
+	return o
+}
+
+//~~fn encode
+// Converts 2d array to csv string.
+fn encode*(inp: [][]str, sep: char = ','): str {
+//~~
+	o := ""
+
+	for i in inp {
+		for j in inp[i] {
+			o += escapeStr(inp[i][j], sep)
+			if j < len(inp[i]) - 1 { o += sep }
+		}
+		o += "\n"
+	}
+
+	return o
+}
+
+fn main() {
+	testval := "val1,val2\nanother row\\,still another row,third value,fourth value\n"
+	res := parse(testval)
+	printf("%v\n", res)
+	printf("%s\n", encode(res))
+}

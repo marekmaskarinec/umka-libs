@@ -1,0 +1,16 @@
+{
+    "name": "csv",
+    "version": "v0.1.0",
+    "author": "Marek Maškarinec <marek@mrms.cz>",
+    "license": "Unlicense/MIT",
+    "description": "CSV parser and encoder",
+    "readme": "README.md",
+    "source": "https://git.sr.ht/~mrms/csvum",
+    "homepage": "https://git.sr.ht/~mrms/csvum",
+    "dependencies": [],
+    "include": ["csv.um"],
+		"run": {
+			"posix": "csv.um",
+			"windows": "csv.um"
+		}
+}
