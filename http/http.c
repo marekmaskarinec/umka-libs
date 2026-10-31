@@ -128,7 +128,7 @@ umc__request(UmkaStackSlot *p, UmkaStackSlot *r)
 {
 	void *umka = r->ptrVal;
 	UmkaAPI *api = umkaGetAPI(umka);
-	struct cRequest *cr = umkaGetParam(p, 0)->ptrVal;
+	struct cRequest *cr = api->umkaGetParam(p, 0)->ptrVal;
 
 	struct RequestHandle *rh =
 	    api->umkaAllocData(umka, sizeof(struct RequestHandle), request_handle_free);
@@ -175,23 +175,24 @@ umc__request(UmkaStackSlot *p, UmkaStackSlot *r)
 
 	rh->thread = OGCreateThread(thread_handler, rh);
 
-	umkaGetResult(p, r)->ptrVal = rh;
+	api->umkaGetResult(p, r)->ptrVal = rh;
 }
 
-// fn umc__poll(rh: ^struct{}, cresp: ^cResponse, typeptr: ^void): int
+// fn umc__poll(rh: ^struct{}, cresp: ^cResponse): int
 void
 umc__poll(UmkaStackSlot *p, UmkaStackSlot *r)
 {
-	struct RequestHandle *rh = umkaGetParam(p, 0)->ptrVal;
 	void *umka = r->ptrVal;
 	UmkaAPI *api = umkaGetAPI(umka);
-	struct cResponse *cresp = umkaGetParam(p, 1)->ptrVal;
-	void *typeptr = umkaGetParam(p, 2)->ptrVal;
+	struct RequestHandle *rh = api->umkaGetParam(p, 0)->ptrVal;
+	struct cResponse *cresp = api->umkaGetParam(p, 1)->ptrVal;
+	const UmkaType *bodyType = api->umkaGetFieldType(
+	    api->umkaGetBaseType(api->umkaGetParamType(p, 1)), "body");
 
 	cresp->progress = rh->progress;
 
 	if (OGGetSema(rh->sema) == 0) {
-		umkaGetResult(p, r)->intVal = -1;
+		api->umkaGetResult(p, r)->intVal = -1;
 		return;
 	}
 
@@ -201,14 +202,14 @@ umc__poll(UmkaStackSlot *p, UmkaStackSlot *r)
 	curl_easy_getinfo(rh->curl, CURLINFO_RESPONSE_CODE, &cresp->status);
 
 	rh->body_data.str[rh->body_data.len] = 0;
-	api->umkaMakeDynArray(umka, &cresp->body, typeptr, rh->body_data.len);
+	api->umkaMakeDynArray(umka, &cresp->body, bodyType, rh->body_data.len);
 	memcpy(cresp->body.data, rh->body_data.str, rh->body_data.len);
 
 	rh->header_data.str[rh->header_data.len] = 0;
 	cresp->headers = api->umkaMakeStr(umka, rh->header_data.str);
 
 cleanup:
-	umkaGetResult(p, r)->intVal = rh->res;
+	api->umkaGetResult(p, r)->intVal = rh->res;
 }
 
 // fn umc__strerror(code: int): str
@@ -217,6 +218,6 @@ umc__strerror(UmkaStackSlot *p, UmkaStackSlot *r)
 {
 	void *umka = r->ptrVal;
 	UmkaAPI *api = umkaGetAPI(umka);
-	int code = umkaGetParam(p, 0)->intVal;
-	umkaGetResult(p, r)->ptrVal = api->umkaMakeStr(umka, curl_easy_strerror(code));
+	int code = api->umkaGetParam(p, 0)->intVal;
+	api->umkaGetResult(p, r)->ptrVal = api->umkaMakeStr(umka, curl_easy_strerror(code));
 }

@@ -60,7 +60,7 @@ type cRequest* = struct {
 type RequestHandle* = struct{ _: ^struct{} }
 
 fn umc__request(cr: ^cRequest): ^struct{}
-fn umc__poll(rh: ^struct{}, cresp: ^cResponse, typeptr: ^void): int
+fn umc__poll(rh: ^struct{}, cresp: ^cResponse): int
 fn umc__strerror(code: int): str
 
 fn errFromCode(code: int): std::Err {
@@ -93,7 +93,7 @@ fn requestAsync*(r: Request): RequestHandle {
 fn (rh: ^RequestHandle) poll*(): (Response, std::Err) {
 //~~
 	cresp := cResponse{}
-	err := umc__poll(rh._, &cresp, typeptr([]char))
+	err := umc__poll(rh._, &cresp)
 	if err != 0 {
 		return { progress: cresp.progress }, errFromCode(err)
 	}
