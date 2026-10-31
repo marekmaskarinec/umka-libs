@@ -1,0 +1,318 @@
+import (
+	"std.um"
+)
+
+//~~
+// fmt.um is a library which provides an alternative formatting function. The
+// library mimicks the naming scheme of the libc printf functions:
+// 
+// * `s` - output to string
+// * `f` - oupput to file
+// * `v` - take arguments as [] instead of using varargs
+//
+// The default `fmt` uses stdout as output and takes arguments through varargs.
+//
+// ## Syntax
+//
+// `{}` in the format strings are substituted by the values from the `args`
+// array. It is not required to specify the type of the value. If you prefix
+// the brackets with a backslash (`\{}`), it will be ignored and printed as
+// `{}`.
+//
+// The brackets can contain modifiers. The syntax is following:
+//
+// ```
+// "{"[[":"][<character>]<number>[":"]]<list of flags>"}"
+// ```
+//
+// The first part of the format modifier is the length. If the formatted value
+// is longer than the length, it will be truncated. If it's shorter, it will be
+// padded by the character (if no character is specified as space is used). The
+// side of the padding is decided based on the colons. If they are on both
+// sides, the text will be padded from both sides.
+//
+// The second part specifies modifier flags, which are single characters
+// (excluding `:`, '\', `}` and numbers). List of flags:
+//
+// * `x` - print as hexadecimal
+// * `X` - print as hexadecimal, uppercase
+// * `p` - pretty print values
+// * `h` - print as a hexdump (can be combined with `p`)
+//~~
+
+type Mod* = struct {
+	padLeft: bool
+	padRight: bool
+	padChar: char
+	pad: int
+	flags: map[char]bool
+}
+
+fn formatVal(v: any, m: Mod): str {
+	s := ""
+
+	if m.flags['x'] {
+		switch i := type(v) {
+		case char:
+			s = sprintf("%x", int(i))
+		case uint8:
+			s = sprintf("%x", i)
+		case int8:
+			s = sprintf("%x", i)
+		case uint16:
+			s = sprintf("%x", i)
+		case int16:
+			s = sprintf("%x", i)
+		case uint32:
+			s = sprintf("%x", i)
+		case int32:
+			s = sprintf("%x", i)
+		case uint:
+			s = sprintf("%x", i)
+		case int:
+			s = sprintf("%x", i)
+		}
+	} else if m.flags['X'] {
+		switch i := type(v) {
+		case char:
+			s = sprintf("%X", int(i))
+		case uint8:
+			s = sprintf("%X", i)
+		case int8:
+			s = sprintf("%X", i)
+		case uint16:
+			s = sprintf("%X", i)
+		case int16:
+			s = sprintf("%X", i)
+		case uint32:
+			s = sprintf("%X", i)
+		case int32:
+			s = sprintf("%X", i)
+		case uint:
+			s = sprintf("%X", i)
+		case int:
+			s = sprintf("%X", i)
+		}
+	} else if m.flags['h'] {
+		if m.flags['p'] {
+			s = "{TODO}"
+		} else {
+			if selfhasptr(v) {
+				s = "{EHASPTR}"
+			} else {
+				bytes := std::tobytes(v)
+				for i,b in bytes {
+					s += sprintf("%02x", b)
+				}
+			}
+		}
+	} else if m.flags['p'] {
+		s = sprintf("%llv", v)
+	} else {
+		if ^str(v) != null {
+			s = str(v)
+		} else {
+			s = sprintf("%v", v)
+		}
+	}
+
+	if m.pad == 0 {
+		return s
+	}
+
+	if len(s) > m.pad {
+		if m.padLeft && m.padRight {
+			return slice(s, (len(s) - m.pad) / 2, (len(s) + m.pad) / 2)
+		} else if m.padLeft {
+			return slice(s, len(s) - m.pad, len(s))
+		}
+		return slice(s, 0, m.pad)
+	}
+
+	buf := make([]char, m.pad)
+	for i in buf {
+		buf[i] = m.padChar
+	}
+
+	start := m.pad - len(s)
+	if m.padLeft && m.padRight {
+		start = (m.pad - len(s)) / 2
+	} else if m.padRight {
+		start = 0
+	}
+
+	for i,c in s {
+		buf[i + start] = c
+	}
+
+	return str(buf)
+}
+
+fn parseMod(s: str): Mod {
+	if len(s) == 0 { return {} }
+
+	type StateType = enum {
+		findPadNumber
+		parsePadLeft
+		parsePadChar
+		parsePadNum
+		parsePadRight
+		parseFlags
+	}
+
+	state := StateType.findPadNumber
+	mod := Mod{}
+
+	for i:=0; i < len(s); i++ {
+		switch state {
+		case .findPadNumber:
+			if s[i] >= '0' && s[i] <= '9' {
+				state = .parsePadLeft
+				i = -1
+			} else if i >= len(s) - 1 {
+				i = -1
+				state = .parseFlags
+			}
+		case .parsePadLeft:
+			if s[i] == ':' {
+				mod.padLeft = true
+			} else {
+				i--
+			}
+
+			state = .parsePadChar
+		case .parsePadChar:
+			mod.padChar = s[i]
+			state = .parsePadNum
+		case .parsePadNum:
+			if s[i] >= '0' && s[i] <= '9' {
+				mod.pad *= 10
+				mod.pad += int(s[i]) - int('0')
+			} else {
+				i--
+				state = .parsePadRight
+			}
+		case .parsePadRight:
+			if s[i] == ':' {
+				mod.padRight = true
+			} else {
+				i--
+			}
+
+			state = .parseFlags
+		case .parseFlags:
+			mod.flags[s[i]] = true
+		}
+	}
+
+	return mod
+}
+
+//~~fn vsfmt
+fn vsfmt*(s: str, args: []any): str {
+//~~
+	o := ""
+	a := 0
+
+	for i:=0; i < len(s); i++ {
+		// handle \{
+		if s[i] == '\\' && i < len(s)-1 && s[i+1] == '{' {
+			o += "{"
+			i++
+			continue
+		}
+
+		// if normal character, just add it to the output
+		if s[i] != '{' {
+			o += s[i]
+			continue
+		}
+
+		if a >= len(args) {
+			return o + "{ENOTENOUGH}" + slice(s, i)
+		}
+
+		i++
+		start := i
+		end := -1
+		for _:=0; i < len(s); i++ {
+			if s[i] == '}' {
+				end = i
+				break
+			}
+		}
+
+		if end < 0 {
+			return o + "{EUNTERMINATED}" + slice(s, start)
+		}
+
+		mod := parseMod(slice(s, start, end))
+		o += formatVal(args[a], mod)
+		a++
+	}
+
+	if a != len(args) {
+		return o + "{TOOMANY}"
+	}
+
+	return o
+}
+
+//~~fn sfmt
+fn sfmt*(s: str, args: ..any): str {
+//~~
+	return vsfmt(s, args)
+}
+
+//~~fn vffmt
+fn vffmt*(f: std::File, s: str, args: []any) {
+//~~
+	fprintf(f, "%s", vsfmt(s, args))
+}
+
+//~~fn ffmt
+fn ffmt*(f: std::File, s: str, args: ..any) {
+//~~
+	vffmt(f, s, args)
+}
+
+//~~fn vfmt
+fn vfmt*(s: str, args: []any) {
+//~~
+	vffmt(std::stdout(), s, args)
+}
+
+//~~fn fmt
+fn fmt*(s: str, args: ..any) {
+//~~
+	vfmt(s, args)
+}
+
+type vec2 = struct {
+	x, y: int
+}
+
+fn main() {
+	printf("basic usage:\n")
+	fmt("  a number {}, a string {}\n", 32, "hello")
+	printf("skip format tag:\n")
+	fmt("  skip me \\{} {}\n", 8)
+	printf("complex types:\n")
+	fmt("  what can this print? {} {}\n", vec2{2, 4}, []int{1, 2, 3, 4})
+	printf("pretty printing:\n")
+	fmt("  {p}\n", vec2{2, 4})
+	printf("print as hex:\n")
+	fmt("  {} == 0x{x}\n", 255, uint8(255))
+	printf("hexdump:\n")
+	fmt("  {} == 0x{h}\n", vec2{2, 4}, vec2{2, 4})
+	printf("pad left:\n")
+	fmt("  {:.11X}\n", 0xfff)
+	printf("pad right:\n")
+	fmt("  {.11:X}\n", 0xfff)
+	printf("pad both:\n")
+	fmt("  {:.11:X}\n", 0xfff)
+	printf("pad too small:\n")
+	fmt("  { 2:} {: 2:} {: 2}\n", "abcdefg", "abcdefg", "abcdefg")
+	printf("unterminated:\n")
+	fmt("  aaaa { bbbbb\n", 1)
+}
