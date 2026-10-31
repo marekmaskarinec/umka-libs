@@ -99,15 +99,15 @@ umc__link(UmkaStackSlot *p, UmkaStackSlot *r)
 #endif
 }
 
-// fn umc__listdir(path: str, files: ^[]str, strArrType: ^void): int
+// fn umc__listdir(path: str, files: ^[]str): int
 void
 umc__listdir(UmkaStackSlot *p, UmkaStackSlot *r)
 {
-	char *path = p[2].ptrVal;
-	UmkaDynArray(char *) *files = p[1].ptrVal;
-	void *str_arr_type = p[0].ptrVal;
 	void *umka = r->ptrVal;
 	UmkaAPI *api = umkaGetAPI(umka);
+	char *path = api->umkaGetParam(p, 0)->ptrVal;
+	UmkaDynArray(char *) *files = api->umkaGetParam(p, 1)->ptrVal;
+	const UmkaType *str_arr_type = api->umkaGetBaseType(api->umkaGetParamType(p, 1));
 
 #ifdef _WIN32
 	int count = 0;

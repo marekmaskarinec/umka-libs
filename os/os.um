@@ -104,7 +104,7 @@ fn link*(target: str, link: str): std::Err {
 	return errFromErrno(umc__link(target, link))
 }
 
-fn umc__listdir(path: str, arr: ^[]str, strArrType: ^void): int
+fn umc__listdir(path: str, arr: ^[]str): int
 					  
 //~~fn listdir
 // Returns a list of files in the given directory, second argument is 0 on
@@ -112,7 +112,7 @@ fn umc__listdir(path: str, arr: ^[]str, strArrType: ^void): int
 fn listdir*(path: str): ([]str, std::Err) {
 //~~
 	var files: []str
-	err := umc__listdir(path, &files, typeptr([]str))
+	err := umc__listdir(path, &files)
 	return files, errFromErrno(err)
 }
 
