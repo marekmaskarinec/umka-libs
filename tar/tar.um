@@ -78,25 +78,25 @@ fn (t: ^Tar) close*(): std::Err {
 		return errFromErrno(err)
 }
 
-fn umc__tar_get_files(tar: ^struct{}, out: ^[]File, fileArrType: ^void): Errno
+fn umc__tar_get_files(tar: ^struct{}, out: ^[]File): Errno
 													  
 //~~fn getFiles
 // Returns a list of files in the given tar archive.
 fn (t: ^Tar) getFiles*(): ([]File, std::Err) {
 //~~
 	var files: []File
-	err := umc__tar_get_files(t._, &files, typeptr([]File))
+	err := umc__tar_get_files(t._, &files)
 	return files, errFromErrno(err)
 }
 
-fn umc__tar_read(tar: ^struct{}, path: str, out: ^[]char, bytesArrType: ^void): Errno
+fn umc__tar_read(tar: ^struct{}, path: str, out: ^[]char): Errno
 
 //~~fn readBin
 // Reads the given file from the tar archive as a byte array.
 fn (t: ^Tar) read*(path: str): ([]char, std::Err) {
 //~~
 	var s: []char
-	err := umc__tar_read(t._, path, &s, typeptr([]char))
+	err := umc__tar_read(t._, path, &s)
 	return s, errFromErrno(err)
 }
 

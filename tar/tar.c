@@ -109,15 +109,15 @@ umc__tar_open_bytes(UmkaStackSlot *p, UmkaStackSlot *r)
 	r->intVal = 0;
 }
 
-// fn umc__tar_get_files(tar: ^struct{}, out: ^[]File, fileArrType: ^void): int
+// fn umc__tar_get_files(tar: ^struct{}, out: ^[]File): int
 void
 umc__tar_get_files(UmkaStackSlot *p, UmkaStackSlot *r)
 {
-	mtar_t *tar = (mtar_t *)p[2].ptrVal;
-	UmkaDynArray(File) *out = p[1].ptrVal;
-	void *fileArrType = p[0].ptrVal;
 	void *umka = r->ptrVal;
 	UmkaAPI *api = umkaGetAPI(umka);
+	mtar_t *tar = (mtar_t *)api->umkaGetParam(p, 0)->ptrVal;
+	UmkaDynArray(File) *out = api->umkaGetParam(p, 1)->ptrVal;
+	const UmkaType *fileArrType = api->umkaGetBaseType(api->umkaGetParamType(p, 1));
 	r->intVal = 0;
 
 	int ret = mtar_seek(tar, 0);
@@ -151,16 +151,16 @@ umc__tar_get_files(UmkaStackSlot *p, UmkaStackSlot *r)
 	}
 }
 
-// fn umc__tar_read_bin(tar: ^struct{}, file: str, out: ^[]byte, byteArrType: ^void): int
+// fn umc__tar_read(tar: ^struct{}, file: str, out: ^[]char): int
 void
 umc__tar_read(UmkaStackSlot *p, UmkaStackSlot *r)
 {
-	mtar_t *tar = (mtar_t *)p[3].ptrVal;
-	char *file = p[2].ptrVal;
-	UmkaDynArray(uint8_t) *out = p[1].ptrVal;
-	void *byteArrType = p[0].ptrVal;
 	void *umka = r->ptrVal;
 	UmkaAPI *api = umkaGetAPI(umka);
+	mtar_t *tar = (mtar_t *)api->umkaGetParam(p, 0)->ptrVal;
+	char *file = api->umkaGetParam(p, 1)->ptrVal;
+	UmkaDynArray(uint8_t) *out = api->umkaGetParam(p, 2)->ptrVal;
+	const UmkaType *byteArrType = api->umkaGetBaseType(api->umkaGetParamType(p, 2));
 	r->intVal = 0;
 
 	mtar_header_t h;
