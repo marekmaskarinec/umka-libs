@@ -1,0 +1,23 @@
+{
+	"name": "http",
+	"version": "v0.4.0",
+	"author": "Marek Ma\u0161karinec <marek@mrms.cz>",
+	"license": "Unlicense/MIT",
+	"description": "HTTP client library",
+	"readme": "README.md",
+	"dependencies": [
+		"umka",
+		"strings"
+	],
+	"include": [
+		"http.um",
+		"http_linux.umi",
+		"http_windows.umi",
+		"libcurl-x64.dll",
+		"curl/"
+	],
+	"source": "https://git.sr.ht/~mrms/httpum",
+	"homepage": "https://git.sr.ht/~mrms/httpum",
+	"run": "make run",
+	"pre_build": "make build"
+}

@@ -1,0 +1,171 @@
+
+import (
+	"std.um"
+	"umbox/strings/strings.um"
+)
+
+//~~struct Progress
+type Progress* = struct {
+	// total data to download
+	dltotal: int
+	// amount of downloaded data
+	dlnow: int
+	// total data to upload
+	ultotal: int
+	// amount of uploaded data
+	ulnow: int
+}
+//~~
+
+//~~struct Response
+type Response* = struct {
+	status: int
+	headers: map[str]str
+	body: []char
+	complete: bool
+	progress: Progress
+}
+//~~
+
+type cResponse* = struct {
+	status: int
+	headers: str
+	body: []char
+	progress: Progress
+}
+
+//~~enum Method
+type Method* = enum {
+	get
+	post
+}
+//~~
+
+//~~struct Request
+type Request* = struct {
+	method: Method
+	url: str
+	headers: map[str]str
+	body: []char
+}
+//~~
+
+type cRequest* = struct {
+	method: Method
+	url: str
+	headers: []str
+	body: []char
+}
+
+type RequestHandle* = struct{ _: ^struct{} }
+
+fn umc__request(cr: ^cRequest): ^struct{}
+fn umc__poll(rh: ^struct{}, cresp: ^cResponse): int
+fn umc__strerror(code: int): str
+
+fn errFromCode(code: int): std::Err {
+	return std::error(code, umc__strerror(code), "http.um")
+}
+
+//~~fn requestAsync
+// Make an asynchronous request and return a RequestHandle. The handle can be
+// polled for the response.
+fn requestAsync*(r: Request): RequestHandle {
+//~~
+	cr := cRequest {
+		method: r.method,
+		url: r.url,
+		headers: {},
+		body: r.body
+	}
+
+	for k,v in r.headers {
+		cr.headers = append(cr.headers, sprintf("%s: %s", k, v))
+	}
+
+	return { umc__request(&cr) }
+}
+
+//~~fn RequestHandle.poll
+// Poll the handle for a response or an error. If the request is ongoing, the
+// response has `completed` set to `false`. The `progress` field can be used to
+// see progress of the request.
+fn (rh: ^RequestHandle) poll*(): (Response, std::Err) {
+//~~
+	cresp := cResponse{}
+	err := umc__poll(rh._, &cresp)
+	if err != 0 {
+		return { progress: cresp.progress }, errFromCode(err)
+	}
+
+	headersList := strings::split(cresp.headers, "\n")
+	headers := map[str]str{}
+
+	for i,h in headersList {
+		sp := strings::split(h, ": ")
+		if len(sp) != 2 { continue }
+		headers[sp[0]] = sp[1]
+	}
+
+	return {
+		status: cresp.status,
+		body: cresp.body,
+		headers: headers,
+		complete: true,
+		progress: cresp.progress
+	}, {}
+}
+
+//~~fn request
+// Make a request and return the response.
+fn request*(r: Request): (Response, std::Err) {
+//~~
+	rh := requestAsync(r)
+	for true {
+		if resp, err := rh.poll(); resp.complete {
+			return resp, err
+		}
+	}
+
+	return {}, {}
+}
+
+//~~Example
+fn main() {
+	rh := requestAsync({
+		url: "https://httpbin.org/get"
+	})
+
+	for true {
+		if resp, err := rh.poll(); resp.complete {
+			std::exitif(err)
+			printf("status: %d\n", resp.status)
+			for k, v in resp.headers {
+				printf("%s: %s\n", k, v)
+			}
+			printf("body: %v\n", str(resp.body))
+			break
+		} else {
+			if resp.progress.dltotal > 0 {
+				printf("Progress: %.1f%% (%d/%d)\n", real(resp.progress.dlnow) / resp.progress.dltotal * 100, resp.progress.dlnow, resp.progress.dltotal)
+			} else {
+				printf("Progress: unknown\n")
+			}
+			for i:=0; i < 1999999; i++ {}
+		}
+	}
+
+	resp, err := request({
+		method: .post,
+		url: "https://httpbin.org/post",
+		headers: { "Content-Type": "application/json" },
+		body: []char("[ 1, 2, 3 ]")
+	})
+	std::exitif(err)
+	printf("status: %d\n", resp.status)
+	for k, v in resp.headers {
+		printf("%s: %s\n", k, v)
+	}
+	printf("body: %v\n", str(resp.body))
+}
+//~~

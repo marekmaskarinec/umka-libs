@@ -1,0 +1,20 @@
+[
+  {
+    "arguments": [
+      "/usr/bin/cc",
+      "-c",
+      "-Wall",
+      "-Wno-unused-label",
+      "-Wno-pointer-to-int-cast",
+      "-Wno-unused-result",
+      "-Ipak/umka/",
+      "-O2",
+      "-o",
+      "http_linux.umi",
+      "http.c"
+    ],
+    "directory": "/home/marek/dev/umlibs/http",
+    "file": "/home/marek/dev/umlibs/http/http.c",
+    "output": "/home/marek/dev/umlibs/http/http_linux.umi"
+  }
+]
