@@ -1,0 +1,189 @@
+
+type State = int
+const (
+	object = State(0)
+	array  = State(1)
+)
+
+//~~type Encoder
+type Encoder* = struct {
+	// Contains private fields
+//~~
+	buffer: str
+	pretty: bool
+
+	nestLevel: int
+	putComma: bool
+	state: []State
+}
+
+//~~fn mk
+// Creates an encoder.
+fn mk*(pretty: bool = true): Encoder {
+//~~
+	return {
+		buffer: "",
+		pretty: pretty,
+		state: { object } }
+}
+
+fn (this: ^Encoder) write(s: str) {
+	this.buffer += s
+}
+
+fn (this: ^Encoder) writec(c: char) {
+	this.buffer += str(c)
+}
+
+fn (this: ^Encoder) newLine() {
+	if this.putComma {
+		this.writec(',')
+		this.putComma = false
+	}
+
+	if !this.pretty {
+		return
+	}
+
+	this.writec('\n')
+	for i:=0; i < this.nestLevel; i++ {
+		this.writec('\t')
+	}
+}
+
+fn (this: ^Encoder) getState(): State {
+	return this.state[len(this.state) - 1]
+}
+
+//~~fn Encoder.startObject
+fn (this: ^Encoder) startObject*() {
+//~~
+	if this.getState() == array {
+		this.newLine()
+	}
+
+	this.writec('{')
+	this.putComma = false
+	this.nestLevel++
+
+	this.state = append(this.state, object)
+}
+
+//~~fn Encoder.endObject
+fn (this: ^Encoder) endObject*() {
+//~~
+	this.nestLevel--
+	if this.pretty {
+		this.putComma = false
+		this.newLine()
+	}
+	this.writec('}')
+
+	this.putComma = true
+	if this.nestLevel < 0 {
+		exit(1, "Incorrect nesting")
+	}
+
+	this.state = slice(this.state, 0, len(this.state) - 1)
+}
+
+//~~fn Encoder.startArray
+fn (this: ^Encoder) startArray*() {
+//~~
+	if this.getState() == array {
+		this.newLine()
+	}
+
+	this.writec('[')
+	this.putComma = false
+	this.nestLevel++
+
+	this.state = append(this.state, array)
+}
+
+//~~fn Encoder.endArray
+fn (this: ^Encoder) endArray*() {
+//~~
+	this.nestLevel--
+
+	if this.pretty {
+		this.putComma = false
+		this.newLine()
+	}
+	this.writec(']')
+
+	this.putComma = true
+	if this.nestLevel < 0 {
+		exit(1, "Incorrect nesting")
+	}
+
+	this.state = slice(this.state, 0, len(this.state) - 1)
+}
+
+//~~fn Encoder.putKey
+fn (this: ^Encoder) putKey*(key: str) {
+//~~
+	this.newLine()
+	this.write(sprintf("\"%s\": ", key))
+}
+
+//~~fn Encoder.putVal
+fn (this: ^Encoder) putVal*(a: any) {
+//~~
+	if this.getState() == array {
+		this.newLine()
+	}
+
+	if ^map[str]any(a) != null {
+		this.startObject()
+			for k,v in map[str]any(a) {
+				this.putKey(k)
+				this.putVal(v)
+			}
+		this.endObject()
+		return
+	}
+
+	if ^[]any(a) != null {
+		this.startArray()
+			for v in []any(a) {
+				this.putVal(v)
+			}
+		this.endArray()
+		return
+	}
+
+	this.write(sprintf("%v", a))
+	this.putComma = true
+}
+
+//~~fn Encoder.toStr
+fn (this: ^Encoder) toStr*(): str {
+//~~
+	return this.buffer
+}
+
+fn main() {
+	enc := mk()
+
+	enc.startObject()
+		enc.putKey("x")
+		enc.putVal(12.0)
+		
+		enc.putKey("y")
+		enc.putVal(20.1)
+
+		enc.putKey("numbers")
+		enc.startArray()
+			enc.putVal(1)
+			enc.putVal(false)
+			enc.putVal("hello I'm a string")
+			enc.putVal(map[str]any{
+				"a": 123,
+				"b": []any{ 1, 2, 3 }
+			})
+		enc.endArray()
+	enc.endObject()
+
+	printf("%s\n", enc.toStr())
+}

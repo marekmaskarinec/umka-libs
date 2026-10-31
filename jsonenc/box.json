@@ -1,0 +1,14 @@
+{
+    "name": "jsonenc",
+    "version": "v0.1.0",
+    "author": "Marek Maškarinec <marek@mrms.cz>",
+    "license": "Unlicense/MIT",
+    "description": "JSON encoder library",
+    "readme": "README.md",
+    "source": "https://git.sr.ht/~mrms/jsonencum",
+    "homepage": "https://git.sr.ht/~mrms/jsonencum",
+    "dependencies": [],
+    "include": ["jsonenc.um"],
+    "run_posix": "./pak/umka/linux/umka jsonenc.um",
+    "run_windows": ".\\pak\\umka\\windows\\umka.exe jsonenc.um"
+}

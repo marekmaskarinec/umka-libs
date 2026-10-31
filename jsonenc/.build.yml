@@ -1,0 +1,24 @@
+image: debian/bullseye
+packages:
+- curl
+- mingw-w64
+- unzip
+secrets:
+- 7f47af0c-9fd1-4363-bac6-52b04721d2f9
+sources:
+- https://git.sr.ht/~mrms/jsonencum
+environment:
+    NAME: jsonencum
+tasks:
+- setup: |
+    curl https://mrms.cz/dl/umbox/umbox_portable.zip -O
+    unzip umbox_portable.zip
+- build: |
+    cd $NAME
+    ../umbox_portable/umbox update
+    ../umbox_portable/umbox build
+- deploy: |
+    cd $NAME
+    set +x
+    ../umbox_portable/umbox upload `cat ../.secret` box.tar
+    set -x
