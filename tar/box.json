@@ -1,0 +1,25 @@
+{
+    "name": "tar",
+    "version": "v0.3.0",
+    "author": "Marek Maškarinec <marek@mrms.cz>",
+    "license": "Unlicense/MIT",
+    "description": "A tar library",
+    "readme": "README.md",
+    "source": "https://git.sr.ht/~mrms/tarum",
+    "homepage": "https://git.sr.ht/~mrms/tarum",
+    "dependencies": [
+        "os",
+        "filepath",
+				"umka_api"
+    ],
+    "include": [
+        "tar.um",
+        "tar_windows.umi",
+        "tar_linux.umi"
+    ],
+    "pre_build": "make",
+		"run": {
+			"posix": "make run",
+			"windows": "./umbox/umka/umka.exe tar.um"
+		}
+}
