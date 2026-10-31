@@ -1,0 +1,24 @@
+image: debian/bullseye
+packages:
+- curl
+- mingw-w64
+- unzip
+secrets:
+- 1489eefb-014f-4007-b40e-4651f2f9a8c0
+sources:
+- https://git.sr.ht/~mrms/stringsum
+environment:
+    NAME: stringsum
+tasks:
+- setup: |
+    curl https://mrms.cz/dl/umbox/umbox_portable.zip -O
+    unzip umbox_portable.zip
+- build: |
+    cd $NAME
+    ../umbox_portable/umbox update
+    ../umbox_portable/umbox build
+- deploy: |
+    cd $NAME
+    set +x
+    ../umbox_portable/umbox upload `cat ../.secret` box.tar
+    set -x
