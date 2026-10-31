@@ -1,0 +1,21 @@
+{
+    "name": "os",
+    "version": "v0.3.0",
+    "author": "Marek Maskarinec <marek@mrms.cz>",
+    "license": "Unlicense/MIT",
+    "description": "OS operation library",
+    "readme": "README.md",
+		"source": "https://git.sr.ht/~mrms/osum",
+		"homepage": "https://git.sr.ht/~mrms/osum",
+    "dependencies": [
+        "umka_api",
+        "filepath"
+    ],
+    "include": [
+        "os.um",
+        "os_linux.umi",
+        "os_windows.umi"
+    ],
+    "pre_build": "make build",
+		"run": "umka os.um"
+}

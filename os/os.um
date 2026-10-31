@@ -1,0 +1,307 @@
+
+import (
+	"std.um"
+	"umbox/filepath/filepath.um"
+)
+
+type Errno* = int
+
+fn umc__strerror(errno: int): str
+			      
+fn strerror*(errno: Errno): str {
+	if errno == 0 { return "" }
+	return umc__strerror(errno)
+}
+
+fn errFromErrno(e: Errno): std::Err {
+	return std::error(e, strerror(e), "os.um")
+}
+
+fn umc__isfile(path: str): bool
+
+//~~fn isfile
+// Returns true if the given path is a regular file, false otherwise.
+// If the file doesn't exist, returns false.
+fn isfile*(path: str): bool {
+//~~
+	return umc__isfile(path)
+}
+
+fn umc__isdir(path: str): bool
+
+//~~fn isdir
+// Returns true if the given path is a directory, false otherwise.
+// If the directory doesn't exist, returns false.
+fn isdir*(path: str): bool {
+//~~
+	return umc__isdir(path)
+}
+
+fn umc__islink(path: str): bool
+
+//~~fn islink
+// Returns true if the given path is a symbolic link, false otherwise.
+// If the link doesn't exist, returns false.
+fn islink*(path: str): bool {
+//~~
+	return umc__islink(path)
+}
+
+fn umc__mkdir(path: str): int
+
+//~~fn mkdir
+// Creates a directory at path. Returns 0 on success, or an errno on failure.
+fn mkdir*(path: str): std::Err {
+//~~
+	err := umc__mkdir(path)
+	return errFromErrno(err)
+}
+
+//~~fn mkdirp
+// If the directory at path doesn't exist, creates it and all parent
+// directories. Returns EALREADY if part of the path already exists and is a
+// file.
+fn mkdirp*(path: str): std::Err {
+//~~
+	// hack to initialize the library
+	filepath::dir(".")
+		
+	parts := filepath::split(path)
+	accum := ""
+	for i in parts {
+		accum += parts[i] + str(filepath::fileseparator)
+		if isfile(accum) {
+			return errFromErrno(37) // EALREADY
+		}
+		
+		if !isdir(accum) {
+			err := mkdir(accum)
+			if err.code != 0 {
+				return err
+			}
+		}
+	}
+	
+	return {}
+}
+
+fn umc__remove(path: str): int
+
+//~~fn remove
+// Removes a file at path. Returns 0 on success, or an errno on failure.
+fn remove*(path: str): std::Err {
+//~~
+	return errFromErrno(umc__remove(path))
+}
+
+fn umc__link(target: str, link: str): int
+
+//~~fn link
+// Creates a symbolic link at link pointing to target. Returns 0 on success, or
+// an errno on failure.
+fn link*(target: str, link: str): std::Err {
+//~~
+	return errFromErrno(umc__link(target, link))
+}
+
+fn umc__listdir(path: str, arr: ^[]str): int
+					  
+//~~fn listdir
+// Returns a list of files in the given directory, second argument is 0 on
+// success or an errno on failure.
+fn listdir*(path: str): ([]str, std::Err) {
+//~~
+	var files: []str
+	err := umc__listdir(path, &files)
+	return files, errFromErrno(err)
+}
+
+//~~struct WalkArgs
+// Arguments to the walk function.
+type WalkArgs* = struct {
+	excludeDirs: bool // if true, directories will not be walked
+	skipLinks: bool   // if true, symbolic links will not be walked
+}
+//~~
+
+//~~fn walk
+// Walks the given directory, calling the given callback for each file.
+fn walk*(dir: str, cb: fn(file: str), args: WalkArgs = {}): std::Err {
+//~~
+	files, err := listdir(dir)
+	if err.code != 0 {
+		return err
+	}
+
+	for i,f in files {
+		if f == "." || f == ".." {
+			continue
+		}
+
+		fullpath := filepath::join(dir, f)
+
+		if isdir(fullpath) {
+			if !(args.skipLinks && islink(fullpath)) {
+				err = walk(fullpath, cb, args)
+				if err.code != 0 {
+					return err
+				}
+			}
+
+			if !args.excludeDirs {
+				cb(fullpath)
+			}
+		} else {
+			cb(fullpath)
+		}
+	}
+
+	return {}
+}
+
+fn umc__chmod(path: str, mode: int): int
+
+//~~fn chmod
+// Changes the permissions of the given file. Returns 0 on success, or an
+// errno on failure.
+fn chmod*(path: str, mode: int): std::Err {
+//~~
+	return errFromErrno(umc__chmod(path, mode))
+}
+
+//~~enum Platform
+// The platform the program is running on.
+type Platform* = enum {
+	posix
+	windows
+	emscripten
+	unknown
+}
+//~~
+
+fn umc__get_plat(): Platform
+
+//~~fn getPlatform
+// Returns the platform the program is running on.
+fn getPlatform*(): Platform {
+//~~
+	return umc__get_plat()
+}
+
+fn umc__getcwd(out: ^str): Errno
+
+//~~fn getCwd
+// Returns the current working directory.
+fn getCwd*(): (str, std::Err) {
+//~~
+	var out: str
+	errno := umc__getcwd(&out)
+	return out, errFromErrno(errno)
+}
+
+fn umc__setenv(key: str, value: str): int
+
+//~~fn setEnv
+// Sets the given environment variable to the given value. Returns 0 on
+// success, or an errno on failure.
+fn setEnv*(key: str, value: str): std::Err {
+//~~
+	return errFromErrno(umc__setenv(key, value))
+}
+
+//~~struct StatBuf
+type StatBuf* = struct {
+	mode: uint32
+	uid: uint32
+	gid: uint32
+	size: uint
+	atime: int
+	mtime: int
+	ctime: int
+}
+//~~
+
+fn umc__stat(path: str, buf: ^StatBuf): Errno
+
+//~~fn stat
+// Get information about a file.
+fn stat*(path: str): (StatBuf, std::Err) {
+//~~
+	sb := StatBuf{}
+	err := umc__stat(path, &sb)
+	return sb, errFromErrno(err)
+}
+
+fn umc__chdir(path: str): Errno
+
+//~~fn chdir
+// Changes the current directory of the process. Returns 0 on success or an errno on failure.
+fn chdir*(path: str): std::Err {
+//~~
+	return errFromErrno(umc__chdir(path))
+}
+
+fn umc__sleep(ms: int)
+
+//~~fn sleep
+// Sleep for `ms` amount of milliseconds.
+fn sleep*(ms: int) {
+//~~
+	umc__sleep(ms)
+}
+
+fn main() {
+	plat := "unknown"
+	switch getPlatform() {
+		case .posix: plat = "POSIX"
+		case .windows: plat = "Windows"
+		case .emscripten: plat = "Emscripten"
+	}
+	printf("Platform: %s\n", plat)
+
+	if cwd, err := getCwd(); err.code != 0 {
+		std::exitif(err)
+	} else {
+		printf("Cwd: %s\n", cwd)
+	}
+
+	mkdir("test")
+		
+	if err := remove("test"); err.code != 0 {
+		printf("Error: %s (code %d) in %v\n", err.msg, err.code, err.sender)
+	}
+ 
+	printf("isfile(\"os.um\") = %v\n", isfile("os.um"))
+	printf("isdir(\"os.um\")  = %v\n", isdir("os.um"))
+	printf("isfile(\"umbox\")   = %v\n", isfile("umbox"))
+	printf("isdir(\"umbox\")    = %v\n", isdir("umbox"))
+	printf("isdir(\"umbox/\")    = %v\n", isdir("umbox/"))
+	printf("isdir(\"umbox\\\")    = %v\n", isdir("umbox\\"))
+	printf("islink(\"umbox\")   = %v\n", islink("umbox"))
+	printf("islink(\"umbox/filepath/umbox/strings\") = %v\n", islink("umbox/filepath/umbox/strings"))
+	printf("stat(\"os.um\") =\n%v\n", stat("os.um"))
+	
+	printf("Walk dir:\n")
+	if err := walk(".", fn(file: str) {
+		printf("\t%v\n", file)
+	}, { skipLinks: true }); err.code != 0 {
+		printf("Error: %s (code %d) in %v\n", err.msg, err.code, err.sender)
+	}
+	
+	mkdirp("test/one/two/three")
+	if err := link("../../two", "test/one/two/three/four"); err.code != 0 {
+		printf("Error: %s (code %d) in %v\n", err.msg, err.code, err.sender)
+	}
+	chmod("test", 0744)
+
+	mkdir("newcwd")
+	std::exitif(chdir("newcwd"))
+
+	if cwd, err := getCwd(); err.code != 0 {
+		std::exitif(err)
+	} else {
+		printf("Cwd: %s\n", cwd)
+		chdir("..")
+		remove("newcwd")
+	}
+}
