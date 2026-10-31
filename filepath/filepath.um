@@ -1,0 +1,142 @@
+
+import (
+	"std.um"
+	"umbox/strings/strings.um"
+)
+
+//~~
+const (
+	nil* = 0
+	windows*
+	unix*
+)
+
+var fileseparator*: char // platform specific file separator. linux => /, windows => \
+var os*: int // current os
+//~~
+
+//~~fn init
+// Automatically initializes platform specific stuff
+fn init() {
+//~~
+	os = windows
+	if std::getenv("HOME") != "" {
+		os = unix
+	}
+
+	switch os {
+	case unix:
+		fileseparator = '/'
+	case windows:
+		fileseparator = '\\'
+	}
+}
+
+//~~fn dir
+// returns the directory in inp
+fn dir*(inp: str): str {
+//~~
+	if os == nil {
+		init()
+	}
+
+	sp := strings::split(inp, "/", str(fileseparator))
+	if len(sp) < 2 {
+		return ""
+	}
+	return strings::join(slice(sp, 0, len(sp)-1), str(fileseparator))
+}
+
+//~~fn file
+// returns the file in inp
+fn file*(inp: str): str {
+//~~
+	if os == nil {
+		init()
+	}
+
+	sp := strings::split(inp, "/", str(fileseparator))
+	if len(sp) < 2 {
+		return inp
+	}
+	return sp[len(sp)-1]
+}
+
+//~~fn ext
+// returns the extension of file inp. if there is no extension, or it is a diroctory, output is ""
+fn ext*(inp: str): str {
+//~~
+	if os == nil {
+		init()
+	}
+	
+	sp := strings::split(inp, ".")
+	return sp[len(sp) - 1]
+}
+
+//~~fn fromslash
+// converts / to platform specific separator
+fn fromslash*(inp: str): str {
+//~~
+	if os == nil {
+		init()
+	}
+
+	return strings::replace(inp, "/", str(fileseparator))
+}
+
+//~~fn toslash
+// converts platform specific separator to /
+fn toslash*(inp: str) : str {
+//~~
+	if os == nil {
+		init()
+	}
+
+	return strings::replace(inp, str(fileseparator), "/")
+}
+
+//~~fn join
+// joins the strings in inp with platform specific separator
+fn join*(inp: ..str): str {
+//~~
+	if os == nil {
+		init()
+	}
+
+	o := ""
+	for i,s in inp {
+		if i != 0 {
+			o += strings::trimprefix(s, str(fileseparator))
+		} else {
+			o += s
+		}
+
+		if len(o) > 0 && i < len(inp) - 1 && o[len(o) -1] != fileseparator {
+			o += str(fileseparator)
+		}
+	}
+	   
+	return o
+}
+
+//~~fn split
+// Splits inp with platform specific separator or /
+fn split*(path: str): []str {
+//~~
+	if os == nil {
+		init()
+	}
+
+	return strings::split(path, "/", str(fileseparator))
+}
+
+fn main() {
+	path := join("home/", "/user", "file.txt")
+	printf("path: %s\n", path)
+	printf("dir: %s\n", dir(path))
+	printf("file: %s\n", file(path))
+	printf("ext: %s\n", ext(path))
+	printf("fromslash: %s\n", fromslash(path))
+	printf("toslash: %s\n", toslash(path))
+}

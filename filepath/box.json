@@ -1,0 +1,17 @@
+{
+    "name": "filepath",
+    "version": "v0.1.1",
+    "author": "Marek Maškarinec <marek@mrms.cz>",
+    "license": "Unlicense/MIT",
+    "description": "Filepath operation library",
+    "readme": "README.md",
+    "source": "https://git.sr.ht/~mrms/filepathum",
+    "link": "https://git.sr.ht/~mrms/filepathum",
+    "dependencies": [
+        "strings"
+    ],
+    "include": [
+        "filepath.um"
+    ],
+		"run": "umka filepath.um"
+}
